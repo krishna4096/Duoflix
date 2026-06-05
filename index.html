@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Duoflix - Premium Streaming</title>
     
     <!-- Tailwind CSS -->
@@ -11,8 +11,8 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+    <!-- Google Fonts: Outfit (Modern Cinematic Look) -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <script>
         tailwind.config = {
@@ -20,7 +20,7 @@
             theme: {
                 extend: {
                     fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
+                        sans: ['Outfit', 'sans-serif'],
                     },
                     colors: {
                         netflix: {
@@ -29,6 +29,9 @@
                             gray: '#808080',
                             light: '#E5E5E5',
                         }
+                    },
+                    aspectRatio: {
+                        'wide': '16 / 9',
                     }
                 }
             }
@@ -43,466 +46,326 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* Hero Banner Vignette/Gradient */
-        .banner-fadeBottom {
-            height: 7.4rem;
-            background-image: linear-gradient(180deg, transparent, rgba(20,20,20,0.61), #141414);
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-        }
-        .hero-vignette {
-            background: linear-gradient(to top, #141414 0%, transparent 60%), linear-gradient(to right, #141414 0%, transparent 50%);
-        }
-
-        /* Nav Transition */
-        .nav-black {
-            background-color: rgba(20, 20, 20, 0.92);
-            backdrop-filter: blur(12px);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
-            transition: all 0.5s ease;
-        }
-        .nav-transparent {
-            background-color: transparent;
-            background-image: linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, transparent 100%);
-            transition: all 0.5s ease;
-        }
-
         /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: #141414; }
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #555; }
+        ::-webkit-scrollbar-thumb:hover { background: #E50914; }
 
-        /* Row Scrolling */
+        /* Row Scrolling (Mobile Touch Friendly) */
         .row-posters {
             display: flex;
             overflow-y: hidden;
-            overflow-x: scroll;
-            padding: 20px 0 20px 0;
+            overflow-x: auto;
             scroll-behavior: smooth;
-            -ms-overflow-style: none;
-            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+            padding: 1rem 0;
+            gap: 10px;
         }
         .row-posters::-webkit-scrollbar { display: none; }
+        .row-posters { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* Movie Posters (Wide 16:9 like Netflix) */
-        .row-poster {
-            object-fit: cover;
-            width: 100%;
-            border-radius: 4px;
-            transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.3s ease;
-            cursor: pointer;
-            flex: 0 0 calc(100% / 2.2);
+        /* Thumbnail (16:9 Wide) */
+        .row-poster-wide {
+            flex: 0 0 160px; /* Mobile width */
             aspect-ratio: 16/9;
-            margin-right: 6px;
-            will-change: transform;
-            background-color: #222;
-            position: relative;
+            object-fit: cover;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.3s;
         }
+        @media (min-width: 640px) { .row-poster-wide { flex: 0 0 220px; } }
+        @media (min-width: 768px) { .row-poster-wide { flex: 0 0 250px; } }
+        @media (min-width: 1024px) { .row-poster-wide { flex: 0 0 280px; } }
         
-        @media (min-width: 640px) { .row-poster { flex: 0 0 calc(100% / 3.2); margin-right: 8px; } }
-        @media (min-width: 768px) { .row-poster { flex: 0 0 calc(100% / 4.2); } }
-        @media (min-width: 1024px) { .row-poster { flex: 0 0 calc(100% / 5.2); } }
-        @media (min-width: 1280px) { .row-poster { flex: 0 0 calc(100% / 6.2); } }
-
-        .row-poster:hover {
-            transform: scale(1.05);
+        .row-poster-wide:hover {
+            transform: scale(1.08);
             z-index: 10;
-            box-shadow: 0px 4px 20px rgba(0,0,0,0.8);
+            box-shadow: 0px 10px 20px rgba(0,0,0,0.8);
         }
 
-        /* Netflix-style Text Overlays (Mimics movie logos) */
-        .poster-title-overlay {
+        /* Hero Gradient */
+        .banner-fadeBottom {
+            height: 10rem;
+            background-image: linear-gradient(180deg, transparent, rgba(20,20,20,0.8), #141414);
             position: absolute;
             bottom: 0;
-            left: 0;
-            right: 0;
-            padding: 15px 10px 10px 10px;
-            background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.5) 60%, transparent 100%);
-            opacity: 1; 
-            pointer-events: none;
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
-        }
-
-        .poster-title-text {
-            color: white;
-            font-size: 1.1rem;
-            font-weight: 900;
-            text-transform: uppercase;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.9), -1px -1px 0 rgba(0,0,0,0.5);
-            text-align: center;
-            line-height: 1.1;
-            font-family: 'Inter', sans-serif;
-            letter-spacing: -0.5px;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
             width: 100%;
         }
 
-        /* Progress Bar */
-        .progress-container {
-            width: 100%; height: 4px; background-color: rgba(128,128,128,0.5); position: absolute; bottom: 0; left: 0;
-            border-bottom-left-radius: 4px; border-bottom-right-radius: 4px; overflow: hidden;
+        /* Navbar Glassmorphism */
+        .nav-black {
+            background-color: rgba(20, 20, 20, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+            transition: all 0.4s ease;
         }
-        .progress-bar { height: 100%; background-color: #E50914; width: 0%; transition: width 0.3s ease; }
+        .nav-transparent {
+            background-color: transparent;
+            background-image: linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, transparent 100%);
+            transition: all 0.4s ease;
+        }
 
-        /* Loading Skeletons */
+        /* Modal Overlays & Animations */
+        .modal-overlay { background-color: rgba(0, 0, 0, 0.8); backdrop-filter: blur(8px); }
+        @keyframes scaleUp { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        .animate-scaleUp { animation: scaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+        /* Skeleton Loading */
         .skeleton {
             background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
             background-size: 200% 100%;
             animation: skeleton-loading 1.5s infinite;
         }
-        @keyframes skeleton-loading {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
+        @keyframes skeleton-loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
-        .modal-overlay { background-color: rgba(0, 0, 0, 0.8); backdrop-filter: blur(8px); }
-
-        /* Auth Screen Background */
-        .auth-bg {
-            background-image: linear-gradient(to top, rgba(0,0,0,0.8) 0, rgba(0,0,0,0.5) 60%, rgba(0,0,0,0.8) 100%), url('https://assets.nflxext.com/ffe/siteui/vlv3/9d3533b2-0e2b-40b2-95e0-eca797975213/fccfca8d-71b5-4a62-a5e2-66ffbc3f57ce/IN-en-20240311-popsignuptwoweeks-perspective_alpha_website_large.jpg');
-            background-size: cover;
-            background-position: center;
-        }
-
-        /* Avatar Selection Styling */
-        .avatar-option {
-            width: 48px;
-            height: 48px;
-            border-radius: 4px;
-            cursor: pointer;
-            border: 2px solid transparent;
-            transition: all 0.2s ease;
-        }
-        .avatar-option:hover { transform: scale(1.1); }
-        .avatar-option.selected {
-            border-color: white;
-            transform: scale(1.1);
-            box-shadow: 0 0 10px rgba(255,255,255,0.3);
-        }
-        
-        /* Custom Player Overlay hide class */
-        .player-idle .player-controls { opacity: 0; pointer-events: none; }
-        .player-idle { cursor: none; }
-
-        /* Custom Video Player Range Sliders */
+        /* Custom Video Player Styles */
         input[type=range] {
-            accent-color: #E50914;
-            height: 4px;
-            cursor: pointer;
+            -webkit-appearance: none; width: 100%; background: transparent; cursor: pointer;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%; height: 6px; background: rgba(255,255,255,0.3); border-radius: 3px;
         }
         input[type=range]::-webkit-slider-thumb {
-            appearance: none;
-            width: 16px;
-            height: 16px;
-            background: #E50914;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: transform 0.1s;
+            -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%;
+            background: #E50914; margin-top: -5px; transition: transform 0.1s;
         }
-        input[type=range]::-webkit-slider-thumb:hover {
-            transform: scale(1.3);
-        }
+        input[type=range]:hover::-webkit-slider-thumb { transform: scale(1.3); }
+        .player-controls-bg { background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); }
+        .player-top-bg { background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent); }
+        
+        .fade-out { opacity: 0; transition: opacity 0.5s; cursor: none; pointer-events: none;}
+        .fade-in { opacity: 1; transition: opacity 0.3s; cursor: default; }
 
+        /* Continue Watching Progress */
+        .progress-container { width: 100%; height: 4px; background-color: rgba(255,255,255,0.2); position: absolute; bottom: 0; left: 0; }
+        .progress-bar { height: 100%; background-color: #E50914; border-radius: 0 2px 2px 0; }
     </style>
 </head>
 <body class="antialiased">
 
-    <!-- Authentication Screen (Login/Signup) -->
-    <div id="auth-screen" class="fixed inset-0 z-[400] auth-bg flex items-center justify-center hidden">
-        <div class="bg-black/80 backdrop-blur-sm p-10 sm:p-16 rounded-xl max-w-md w-full mx-4 shadow-2xl border border-gray-800">
-            <h1 class="text-netflix-red text-4xl font-black tracking-wide uppercase drop-shadow-md mb-8 text-center">Duoflix</h1>
-            
-            <h2 id="auth-title" class="text-3xl font-bold mb-8 text-white">Sign In</h2>
-            
-            <form id="auth-form" onsubmit="handleAuth(event)">
-                <input type="email" id="auth-email" placeholder="Email address" required class="w-full bg-[#333] border border-gray-600 text-white px-4 py-3 rounded outline-none focus:bg-[#444] mb-4 transition-colors">
-                <input type="password" id="auth-password" placeholder="Password" required class="w-full bg-[#333] border border-gray-600 text-white px-4 py-3 rounded outline-none focus:bg-[#444] mb-4 transition-colors">
-                
-                <!-- Avatar Selection (Only visible during Signup) -->
-                <div id="avatar-selection-container" class="hidden mb-6">
-                    <p class="text-gray-400 text-sm mb-2 font-medium">Choose your Avatar:</p>
-                    <div class="flex flex-wrap gap-3 justify-center max-h-32 overflow-y-auto custom-scrollbar" id="avatar-list">
-                        <!-- Avatars will be injected here -->
-                    </div>
-                </div>
+    <!-- API Setup Modal -->
+    <div id="api-setup-modal" class="fixed inset-0 z-[200] hidden items-center justify-center modal-overlay p-4">
+        <div class="bg-[#181818] p-6 md:p-8 rounded-xl max-w-md w-full shadow-2xl border border-gray-800 animate-scaleUp">
+            <h2 class="text-2xl md:text-3xl font-bold mb-4 text-white">Welcome to <span class="text-netflix-red">Duoflix</span></h2>
+            <p class="text-gray-400 mb-6 text-sm">Please enter a valid TMDB v3 API Key to fetch real movie data.</p>
+            <input type="text" id="api-key-input" placeholder="TMDB API Key..." class="w-full bg-[#333] text-white px-4 py-3 rounded outline-none focus:ring-2 focus:ring-netflix-red mb-4">
+            <button onclick="window.saveApiKey()" class="w-full bg-netflix-red hover:bg-red-700 text-white font-semibold py-3 rounded transition shadow-[0_4px_15px_rgba(229,9,20,0.4)]">Start Watching</button>
+        </div>
+    </div>
 
-                <p id="auth-error-msg" class="text-[#e87c03] text-sm mb-4 hidden"></p>
-                
-                <button type="submit" id="auth-btn" class="w-full bg-netflix-red hover:bg-red-700 text-white font-bold py-3 rounded transition-transform hover:scale-[1.02] active:scale-95 shadow-lg">Sign In</button>
-            </form>
+    <!-- Firebase Auth Modal (Login/Signup) -->
+    <div id="auth-modal" class="fixed inset-0 z-[150] hidden items-center justify-center modal-overlay p-4">
+        <div class="bg-[#181818] p-6 md:p-10 rounded-xl max-w-md w-full shadow-2xl border border-gray-800 animate-scaleUp">
+            <h2 id="auth-title" class="text-3xl font-bold mb-6 text-white text-center">Sign In</h2>
+            <div id="auth-error" class="hidden bg-red-500/20 text-red-500 border border-red-500 rounded p-3 mb-4 text-sm text-center"></div>
             
-            <div class="mt-10 text-gray-400 text-sm">
-                <span id="auth-toggle-text">New to Duoflix?</span> 
-                <button onclick="toggleAuthMode()" id="auth-toggle-btn" class="text-white hover:underline font-medium ml-1">Sign up now.</button>
+            <input type="email" id="auth-email" placeholder="Email Address" class="w-full bg-[#333] text-white px-4 py-3 rounded outline-none focus:ring-2 focus:ring-netflix-red mb-4">
+            <input type="password" id="auth-password" placeholder="Password" class="w-full bg-[#333] text-white px-4 py-3 rounded outline-none focus:ring-2 focus:ring-netflix-red mb-6">
+            
+            <button id="auth-action-btn" onclick="window.handleAuth()" class="w-full bg-netflix-red hover:bg-red-700 text-white font-bold py-3 rounded transition shadow-lg text-lg">Sign In</button>
+            
+            <p class="mt-6 text-gray-400 text-center text-sm">
+                <span id="auth-switch-text">New to Duoflix?</span> 
+                <button onclick="window.toggleAuthMode()" id="auth-switch-btn" class="text-white hover:underline font-medium ml-1">Sign up now.</button>
+            </p>
+        </div>
+    </div>
+
+    <!-- Avatar Selection Modal -->
+    <div id="avatar-modal" class="fixed inset-0 z-[160] hidden items-center justify-center modal-overlay p-4">
+        <div class="bg-[#181818] p-6 rounded-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto shadow-2xl border border-gray-800 animate-scaleUp">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold">Choose Profile Icon</h2>
+                <button onclick="window.closeAvatarModal()" class="text-gray-400 hover:text-white"><i class="fas fa-times text-xl"></i></button>
+            </div>
+            <div id="avatar-grid" class="flex flex-wrap gap-4 justify-center">
+                <!-- Avatars injected here -->
             </div>
         </div>
     </div>
 
-    <!-- Global Loading Spinner -->
-    <div id="global-loader" class="fixed inset-0 z-[500] bg-[#141414] flex flex-col items-center justify-center">
-        <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-netflix-red mb-4"></div>
-        <p class="text-gray-400 font-medium text-xl">Duoflix</p>
-    </div>
-
-    <!-- API Setup Modal -->
-    <div id="api-setup-modal" class="fixed inset-0 z-[200] hidden items-center justify-center modal-overlay">
-        <div class="bg-[#181818]/90 backdrop-blur-xl p-8 rounded-xl max-w-md w-full mx-4 shadow-2xl border border-gray-700">
-            <h2 class="text-3xl font-black mb-2 text-white uppercase tracking-wider text-center"><span class="text-netflix-red">Duo</span>flix API</h2>
-            <p class="text-gray-300 mb-6 text-sm text-center">To fetch live movies and TV shows, please enter a valid TMDB v3 API Key. (Stored on your device)</p>
+    <nav id="navbar" class="fixed w-full z-50 nav-transparent flex items-center justify-between px-4 md:px-12 py-3 md:py-4">
+        <div class="flex items-center gap-6 md:gap-10">
+            <h1 class="text-netflix-red text-2xl md:text-4xl font-black cursor-pointer tracking-tighter" onclick="window.renderHome()">DUOFLIX</h1>
             
-            <input type="text" id="api-key-input" placeholder="TMDB API Key (e.g. 1a2b3c...)" class="w-full bg-[#222] border border-gray-600 text-white px-4 py-3 rounded-lg outline-none focus:ring-2 focus:ring-netflix-red mb-2 transition-all">
-            
-            <p id="api-error-msg" class="text-red-500 text-xs mb-4 hidden font-medium text-center"></p>
-            <p class="text-xs text-gray-400 mb-6 text-center">Get it free from <a href="https://www.themoviedb.org/settings/api" target="_blank" class="text-netflix-red hover:underline font-semibold">TMDB</a></p>
-            <button onclick="saveApiKey()" class="w-full bg-netflix-red hover:bg-red-700 text-white font-bold py-3 rounded-lg transition-transform hover:scale-[1.02]">Start Watching</button>
-        </div>
-    </div>
-
-    <!-- Navigation -->
-    <nav id="navbar" class="fixed w-full z-50 nav-transparent flex items-center justify-between px-4 md:px-12 py-4">
-        <div class="flex items-center gap-8">
-            <h1 class="text-netflix-red text-2xl md:text-3xl font-black cursor-pointer tracking-wide uppercase drop-shadow-md hover:scale-105 transition-transform" onclick="renderHome()">Duoflix</h1>
-            
-            <ul class="hidden md:flex gap-6 text-sm text-gray-200 font-medium">
-                <li class="hover:text-white cursor-pointer transition" onclick="renderHome()">Home</li>
-                <li class="hover:text-white cursor-pointer transition" onclick="scrollToSection('tv-shows')">TV Shows</li>
-                <li class="hover:text-white cursor-pointer transition" onclick="scrollToSection('movies')">Movies</li>
-                <li class="hover:text-white cursor-pointer transition" onclick="scrollToSection('trending')">New & Popular</li>
-                <li class="hover:text-white cursor-pointer transition" onclick="showWatchlist()">My List</li>
+            <ul class="hidden md:flex gap-5 text-sm text-gray-200 font-medium">
+                <li class="hover:text-gray-400 cursor-pointer transition" onclick="window.renderHome()">Home</li>
+                <li class="hover:text-gray-400 cursor-pointer transition" onclick="window.scrollToSection('tv-shows')">TV Shows</li>
+                <li class="hover:text-gray-400 cursor-pointer transition" onclick="window.scrollToSection('movies')">Movies</li>
+                <li class="hover:text-gray-400 cursor-pointer transition" onclick="window.showWatchlist()">My List</li>
             </ul>
         </div>
         
-        <div class="flex items-center gap-6">
+        <div class="flex items-center gap-4 md:gap-6">
+            <!-- Search -->
             <div class="relative flex items-center">
-                <div id="search-box" class="hidden absolute right-8 flex items-center bg-black/80 backdrop-blur-md border border-gray-600 rounded-full px-3 py-1.5 transition-all shadow-xl">
-                    <i class="fas fa-search text-gray-400 text-sm mr-2"></i>
-                    <input type="text" id="search-input" placeholder="Titles, people, genres" class="bg-transparent text-white text-sm outline-none w-32 md:w-48">
-                    <i class="fas fa-times text-gray-400 cursor-pointer text-sm hover:text-white ml-2" onclick="toggleSearch()"></i>
+                <div id="search-box" class="hidden absolute right-6 md:right-8 flex items-center bg-black/80 border border-gray-600 px-2 py-1 rounded">
+                    <i class="fas fa-search text-gray-400 text-sm"></i>
+                    <input type="text" id="search-input" placeholder="Titles, genres..." class="bg-transparent text-white text-sm outline-none w-32 md:w-48 px-2 py-1">
+                    <i class="fas fa-times text-gray-400 cursor-pointer text-sm hover:text-white ml-1" onclick="window.toggleSearch()"></i>
                 </div>
-                <i class="fas fa-search text-white cursor-pointer text-xl hover:text-gray-300 transition-transform hover:scale-110 drop-shadow-md" onclick="toggleSearch()" id="search-icon"></i>
+                <i class="fas fa-search text-white cursor-pointer text-xl hover:text-gray-300" onclick="window.toggleSearch()" id="search-icon"></i>
             </div>
             
-            <!-- Profile -->
+            <!-- Profile Dropdown -->
             <div class="flex items-center gap-2 cursor-pointer group relative">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png" alt="Profile" id="nav-profile-img" class="w-8 h-8 rounded-md shadow-md border border-transparent group-hover:border-white transition-colors">
-                <i class="fas fa-caret-down text-white text-xs group-hover:rotate-180 transition-transform duration-300 drop-shadow-md"></i>
+                <img id="user-avatar-main" src="https://wallpapers.com/images/hd/netflix-profile-pictures-1000-x-1000-qo9h82134t9nv0j0.jpg" alt="Profile" class="w-8 h-8 rounded border border-gray-800">
+                <i class="fas fa-caret-down text-white text-xs group-hover:rotate-180 transition hidden md:block"></i>
                 
-                <div class="absolute top-10 right-0 bg-black/90 backdrop-blur-lg border border-gray-800 rounded-md w-48 hidden group-hover:block pt-2 pb-2 shadow-2xl">
-                    <div class="px-4 py-3 flex items-center gap-3 border-b border-gray-800 mb-1">
-                         <img src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png" id="dropdown-profile-img" class="w-10 h-10 rounded-md border border-gray-600">
-                         <div class="overflow-hidden">
-                             <p class="text-sm text-white font-bold truncate">Account</p>
-                             <p class="text-xs text-gray-500 truncate" id="user-email-display">user@email.com</p>
-                         </div>
-                    </div>
-                    
-                    <div class="px-4 py-2 hover:bg-gray-800 hover:text-white text-gray-300 text-sm cursor-pointer transition-colors" onclick="openAccountSettings()"><i class="fas fa-pencil-alt mr-2 w-4 text-center"></i> Manage Profiles</div>
-                    <div class="px-4 py-2 hover:bg-gray-800 hover:text-white text-gray-300 text-sm cursor-pointer transition-colors" onclick="showWatchlist()"><i class="fas fa-list mr-2 w-4 text-center"></i> My List</div>
-                    <div class="mt-1 border-t border-gray-800 pt-1">
-                        <div class="px-4 py-3 hover:bg-netflix-red hover:text-white text-gray-300 text-sm cursor-pointer transition-colors text-center font-medium" onclick="logoutUser()">Sign out of Duoflix</div>
-                    </div>
+                <div class="absolute top-10 right-0 bg-[#141414] border border-gray-800 rounded w-40 hidden group-hover:block pt-2 pb-2 shadow-xl">
+                    <div class="px-4 py-2 hover:bg-gray-800 text-sm cursor-pointer flex items-center gap-2" onclick="window.openAvatarModal()"><i class="fas fa-user-edit w-4"></i> Edit Profile</div>
+                    <div class="px-4 py-2 hover:bg-gray-800 text-sm cursor-pointer flex items-center gap-2" onclick="window.clearApiKey()"><i class="fas fa-key w-4"></i> Reset API Key</div>
+                    <div class="border-t border-gray-800 my-1"></div>
+                    <div class="px-4 py-2 hover:bg-gray-800 text-sm cursor-pointer flex items-center gap-2 text-red-500" onclick="window.logout()"><i class="fas fa-sign-out-alt w-4"></i> Sign out</div>
                 </div>
             </div>
         </div>
     </nav>
 
-    <!-- Account Settings Modal -->
-    <div id="account-settings-modal" class="fixed inset-0 z-[200] hidden items-center justify-center modal-overlay">
-        <div class="bg-[#181818]/95 backdrop-blur-xl p-8 rounded-xl max-w-md w-full mx-4 shadow-2xl border border-gray-700 relative">
-             <button onclick="closeAccountSettings()" class="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors">
-                <i class="fas fa-times text-xl"></i>
-            </button>
-            <h2 class="text-2xl font-bold mb-6 text-white border-b border-gray-700 pb-2">Edit Profile</h2>
-            
-            <div class="flex items-start gap-6 mb-8">
-                <div class="relative group cursor-pointer">
-                    <img id="settings-current-avatar" src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png" class="w-24 h-24 rounded-md border-2 border-gray-600 group-hover:border-white transition-colors">
-                </div>
-                <div class="flex-grow">
-                    <p class="text-sm text-gray-400 mb-1">Email</p>
-                    <p id="settings-email" class="text-white font-medium mb-4">...</p>
-                </div>
-            </div>
-
-            <div class="mb-6">
-                <p class="text-sm text-gray-400 mb-3 font-medium">Choose Avatar</p>
-                <div class="flex flex-wrap gap-3 justify-start max-h-48 overflow-y-auto custom-scrollbar pb-2" id="settings-avatar-list">
-                    <!-- Avatars injected here -->
-                </div>
-            </div>
-
-            <button onclick="saveAccountSettings()" class="w-full bg-white hover:bg-gray-200 text-black font-bold py-3 rounded-lg transition-transform hover:scale-[1.02]">Save Changes</button>
-        </div>
-    </div>
-
     <!-- Search Results View -->
-    <div id="search-results-view" class="hidden min-h-screen pt-28 px-4 md:px-12 bg-[#141414] z-40 relative">
-        <h2 class="text-2xl font-bold mb-6 text-gray-400">Search Results for "<span id="search-query-display" class="text-white"></span>"</h2>
-        <div id="search-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 pb-20"></div>
+    <div id="search-results-view" class="hidden min-h-screen pt-24 px-4 md:px-12 bg-[#141414] z-40 relative pb-20">
+        <h2 class="text-xl md:text-2xl font-bold mb-6 text-gray-400">Results for "<span id="search-query-display" class="text-white"></span>"</h2>
+        <div id="search-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
     </div>
 
     <!-- Watchlist View -->
-    <div id="watchlist-view" class="hidden min-h-screen pt-28 px-4 md:px-12 bg-[#141414] z-40 relative">
-        <h2 class="text-3xl font-bold mb-6 text-white drop-shadow-md">My List</h2>
-        <div id="watchlist-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 pb-20"></div>
+    <div id="watchlist-view" class="hidden min-h-screen pt-24 px-4 md:px-12 bg-[#141414] z-40 relative pb-20">
+        <h2 class="text-2xl md:text-3xl font-bold mb-6">My List</h2>
+        <div id="watchlist-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
     </div>
 
     <!-- Main Content (Home) -->
-    <div id="main-view" class="hidden">
+    <div id="main-view">
         <!-- Hero Banner -->
-        <header id="hero-banner" class="relative h-[85vh] md:h-[90vh] bg-cover bg-center text-white skeleton transition-all duration-1000 ease-out" style="background-image: url('');">
-            <div class="hero-vignette absolute inset-0"></div>
-            <div class="absolute bottom-[20%] left-4 md:left-12 max-w-2xl z-10">
-                <h1 id="hero-title" class="text-5xl md:text-7xl font-black mb-4 drop-shadow-2xl tracking-tight text-white line-clamp-2 leading-tight">...</h1>
-                <p id="hero-overview" class="text-sm md:text-lg text-gray-200 drop-shadow-xl mb-8 line-clamp-3 md:line-clamp-4 max-w-xl font-medium leading-relaxed">Loading content...</p>
-                <div class="flex gap-4">
-                    <button id="hero-play-btn" class="bg-white text-black px-6 md:px-8 py-2 md:py-3 rounded-md font-bold flex items-center gap-3 hover:bg-gray-200 hover:scale-105 shadow-[0_0_20px_rgba(255,255,255,0.3)] transition-all duration-300 text-lg">
+        <header id="hero-banner" class="relative h-[60vh] md:h-[85vh] bg-cover bg-center text-white skeleton" style="background-image: url('');">
+            <div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent"></div>
+            <div class="absolute bottom-1/4 left-4 md:left-12 max-w-2xl z-10 w-[90%] md:w-full">
+                <h1 id="hero-title" class="text-3xl md:text-6xl font-black mb-2 md:mb-4 drop-shadow-2xl tracking-wide">...</h1>
+                <p id="hero-overview" class="text-xs md:text-lg text-gray-200 drop-shadow-md mb-4 md:mb-6 line-clamp-3 md:line-clamp-4 font-light">
+                    Loading cinematic experience...
+                </p>
+                <div class="flex gap-3 md:gap-4">
+                    <button id="hero-play-btn" class="bg-white text-black px-6 md:px-8 py-2 md:py-3 rounded font-bold flex items-center gap-2 hover:bg-gray-300 transition hover:scale-105 shadow-lg text-sm md:text-base">
                         <i class="fas fa-play"></i> Play
                     </button>
-                    <button id="hero-info-btn" class="bg-gray-500/60 backdrop-blur-md text-white px-6 md:px-8 py-2 md:py-3 rounded-md font-bold flex items-center gap-3 hover:bg-gray-500/80 hover:scale-105 shadow-xl transition-all duration-300 text-lg border border-transparent hover:border-gray-400">
-                        <i class="fas fa-info-circle text-xl"></i> More Info
+                    <button id="hero-info-btn" class="bg-gray-500/60 backdrop-blur-sm text-white px-6 md:px-8 py-2 md:py-3 rounded font-bold flex items-center gap-2 hover:bg-gray-500/80 transition hover:scale-105 text-sm md:text-base">
+                        <i class="fas fa-info-circle"></i> More Info
                     </button>
                 </div>
             </div>
             <div class="banner-fadeBottom"></div>
         </header>
 
-        <div class="pl-4 md:pl-12 pb-20 -mt-24 md:-mt-32 relative z-20 space-y-8 md:space-y-12" id="rows-container">
-            <!-- Rows dynamically injected here -->
+        <!-- Rows Container -->
+        <div class="pl-4 md:pl-12 pb-20 -mt-16 md:-mt-32 relative z-20 space-y-6 md:space-y-10" id="rows-container">
+            <!-- Rows injected dynamically -->
         </div>
     </div>
 
-    <!-- Movie/TV Details Modal -->
-    <div id="details-modal" class="fixed inset-0 z-[100] hidden overflow-y-auto">
-        <div class="modal-overlay absolute inset-0" onclick="closeModal()"></div>
-        <div class="relative w-full max-w-5xl mx-auto my-8 bg-[#181818] rounded-xl shadow-[0_0_50px_rgba(0,0,0,0.8)] overflow-hidden z-10 border border-gray-800">
+    <div id="details-modal" class="fixed inset-0 z-[60] hidden overflow-y-auto">
+        <div class="modal-overlay absolute inset-0 min-h-screen" onclick="window.closeModal()"></div>
+        <div class="relative w-full max-w-5xl mx-auto md:my-8 bg-[#181818] md:rounded-xl shadow-2xl overflow-hidden z-10 animate-scaleUp min-h-screen md:min-h-0 pb-10">
             
-            <button onclick="closeModal()" class="absolute top-4 right-4 z-50 bg-[#181818]/80 backdrop-blur-md w-10 h-10 rounded-full flex items-center justify-center hover:bg-white hover:text-black transition-colors text-white border border-gray-600 shadow-lg">
+            <button onclick="window.closeModal()" class="absolute top-4 right-4 z-50 bg-[#181818]/80 backdrop-blur w-10 h-10 rounded-full flex items-center justify-center hover:bg-white hover:text-black transition text-white border border-gray-600">
                 <i class="fas fa-times text-xl"></i>
             </button>
 
             <!-- Header Backdrop -->
-            <div class="relative h-72 md:h-[450px] w-full skeleton" id="modal-backdrop">
-                <div class="absolute inset-0 bg-gradient-to-t from-[#181818] via-[#181818]/60 to-transparent"></div>
-                <div class="absolute bottom-6 left-8 right-8 max-w-3xl">
-                    <h2 id="modal-title" class="text-4xl md:text-5xl font-black drop-shadow-2xl mb-4 leading-tight">...</h2>
-                    <div class="flex items-center gap-4 text-sm font-semibold mb-6">
-                        <span id="modal-match" class="text-green-500 drop-shadow">98% Match</span>
-                        <span id="modal-year" class="text-gray-300 drop-shadow">...</span>
-                        <span id="modal-rating" class="border border-gray-500 px-2 py-0.5 rounded text-gray-300">...</span>
-                        <span id="modal-runtime" class="text-gray-300 drop-shadow">...</span>
+            <div class="relative h-64 sm:h-[400px] w-full skeleton" id="modal-backdrop">
+                <div class="absolute inset-0 bg-gradient-to-t from-[#181818] via-[#181818]/40 to-transparent"></div>
+                <div class="absolute bottom-6 left-4 md:left-10 max-w-3xl w-[90%]">
+                    <h2 id="modal-title" class="text-3xl sm:text-5xl font-black drop-shadow-2xl mb-4">...</h2>
+                    <div class="flex items-center gap-3 md:gap-4 text-xs md:text-sm font-medium mb-4 flex-wrap">
+                        <span id="modal-match" class="text-green-500 font-bold">98% Match</span>
+                        <span id="modal-year" class="text-gray-300">...</span>
+                        <span id="modal-rating" class="border border-gray-600 px-1.5 py-0.5 rounded text-gray-300">...</span>
+                        <span id="modal-runtime" class="text-gray-300">...</span>
                     </div>
-                    <div class="flex gap-4 mb-2">
-                        <button id="modal-play-btn" class="bg-white text-black px-8 py-2.5 rounded-md font-bold flex items-center gap-2 hover:bg-gray-200 hover:scale-105 transition-all shadow-lg text-lg">
+                    <div class="flex gap-3 items-center">
+                        <button id="modal-play-btn" class="bg-white text-black px-6 md:px-10 py-2 md:py-2.5 rounded font-bold flex items-center gap-2 hover:bg-gray-300 transition text-sm md:text-base">
                             <i class="fas fa-play"></i> Play
                         </button>
-                        <button id="modal-add-btn" class="bg-[#2a2a2a]/80 backdrop-blur border border-gray-500 text-white w-12 h-12 rounded-full flex items-center justify-center hover:border-white hover:bg-[#404040] hover:scale-110 transition-all shadow-lg">
-                            <i class="fas fa-plus text-xl" id="modal-add-icon"></i>
+                        <button id="modal-add-btn" class="bg-transparent border-2 border-gray-500 text-white w-10 h-10 md:w-11 md:h-11 rounded-full flex items-center justify-center hover:border-white transition bg-[#181818]/50" onclick="window.toggleWatchlistAction()">
+                            <i class="fas fa-plus" id="modal-add-icon"></i>
                         </button>
                     </div>
                 </div>
             </div>
 
             <!-- Details Content -->
-            <div class="px-8 py-6 grid grid-cols-1 md:grid-cols-3 gap-10 bg-[#181818]">
+            <div class="px-4 md:px-10 py-6 grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div class="col-span-2">
-                    <p id="modal-overview" class="text-base md:text-lg text-gray-200 leading-relaxed mb-8 font-medium">...</p>
-                    
-                    <div id="tv-controls" class="hidden mb-6 bg-[#222] p-5 rounded-xl border border-gray-800 shadow-inner">
-                        <div class="flex justify-between items-center mb-6">
-                            <h3 class="text-2xl font-bold text-white">Episodes</h3>
-                            <select id="season-selector" class="bg-[#333] border border-gray-600 text-white px-4 py-2 rounded-md outline-none focus:border-netflix-red font-medium shadow-sm" onchange="loadEpisodes(this.value)">
-                            </select>
-                        </div>
-                        <div id="episodes-list" class="max-h-96 overflow-y-auto pr-3 space-y-3 custom-scrollbar"></div>
-                    </div>
+                    <p id="modal-overview" class="text-sm md:text-base text-gray-300 leading-relaxed mb-8 font-light">...</p>
                 </div>
-                
-                <div class="col-span-1 text-sm md:text-base text-gray-400 space-y-6">
-                    <div><span class="text-gray-500 block mb-1">Cast</span><span id="modal-cast" class="text-white leading-relaxed">...</span></div>
-                    <div><span class="text-gray-500 block mb-1">Genres</span><span id="modal-genres" class="text-white leading-relaxed">...</span></div>
+                <div class="col-span-1 text-xs md:text-sm text-gray-400 space-y-4 font-light">
+                    <div><span class="text-gray-500">Cast: </span><span id="modal-cast" class="text-gray-200">...</span></div>
+                    <div><span class="text-gray-500">Genres: </span><span id="modal-genres" class="text-gray-200">...</span></div>
                 </div>
-            </div>
-
-            <!-- Similar Section -->
-            <div class="px-8 py-8 bg-[#141414] border-t border-gray-800">
-                <h3 class="text-2xl font-bold mb-6 text-white">More Like This</h3>
-                <div id="modal-similar" class="grid grid-cols-2 md:grid-cols-3 gap-4"></div>
             </div>
         </div>
     </div>
 
-    <!-- Custom Video Player Wrapper -->
-    <div id="player-wrapper" class="fixed inset-0 z-[999] bg-black hidden flex-col transition-all duration-300">
-        
-        <!-- The actual video element -->
+    <div id="custom-player-container" class="fixed inset-0 bg-black z-[100] hidden flex-col">
+        <!-- Video Element -->
         <video id="custom-video" class="w-full h-full object-contain" playsinline preload="metadata">
-            <source src="http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
-            Your browser does not support the video tag.
+            <source src="https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
+            Your browser does not support HTML5 video.
         </video>
 
-        <!-- Player Controls Overlay -->
-        <div id="player-controls" class="player-controls absolute inset-0 flex flex-col justify-between transition-opacity duration-500 opacity-100 z-10">
+        <!-- Player Controls Overlay (Fades out when idle) -->
+        <div id="player-controls-wrapper" class="absolute inset-0 flex flex-col justify-between transition-opacity duration-300 z-10 fade-in">
             
-            <!-- Top Controls (Back Button & Title) -->
-            <div class="p-6 md:p-8 flex items-center bg-gradient-to-b from-black/90 via-black/40 to-transparent pointer-events-auto h-32">
-                <button onclick="closePlayer()" class="text-white hover:scale-110 transition-transform mr-6 drop-shadow-md">
-                    <i class="fas fa-arrow-left text-4xl"></i>
+            <!-- Top Bar -->
+            <div class="player-top-bg p-4 md:p-6 flex items-center gap-4">
+                <button onclick="window.closePlayer()" class="text-white hover:text-gray-300 transition p-2">
+                    <i class="fas fa-arrow-left text-2xl md:text-3xl"></i>
                 </button>
-                <div id="player-custom-title" class="text-white text-2xl md:text-3xl font-bold drop-shadow-xl tracking-wide"></div>
+                <div id="player-custom-title" class="text-white font-bold text-lg md:text-2xl drop-shadow-md truncate">Movie Title</div>
             </div>
-            
+
+            <!-- Center Big Play/Pause (Mobile Friendly) -->
+            <div class="flex-1 flex items-center justify-center" onclick="window.togglePlay()">
+                <!-- Invisible click area for playing/pausing via center screen click -->
+            </div>
+
             <!-- Bottom Controls -->
-            <div class="p-6 md:p-8 bg-gradient-to-t from-black/90 via-black/50 to-transparent pointer-events-auto w-full">
-                
+            <div class="player-controls-bg px-4 md:px-8 py-4 md:py-6 flex flex-col gap-2">
                 <!-- Seek Bar -->
-                <div class="flex items-center gap-4 w-full mb-6">
-                    <span id="time-current" class="text-white text-sm font-medium w-12 text-center drop-shadow">0:00</span>
-                    <input type="range" id="seek-bar" class="w-full bg-gray-600 rounded-lg appearance-none" value="0" min="0" step="0.1">
-                    <span id="time-total" class="text-white text-sm font-medium w-12 text-center drop-shadow">0:00</span>
+                <div class="flex items-center gap-4 w-full">
+                    <span id="player-time-current" class="text-white text-xs md:text-sm w-12 text-right">0:00</span>
+                    <input type="range" id="player-seek-bar" value="0" min="0" step="1" class="flex-1 h-2">
+                    <span id="player-time-total" class="text-white text-xs md:text-sm w-12">0:00</span>
                 </div>
 
                 <!-- Control Buttons -->
-                <div class="flex justify-between items-center text-white">
-                    
-                    <div class="flex items-center gap-6 md:gap-8">
-                        <button id="play-pause-btn" class="hover:scale-110 transition-transform"><i class="fas fa-play text-3xl"></i></button>
-                        <button id="rewind-btn" class="hover:scale-110 transition-transform hidden sm:block"><i class="fas fa-undo text-2xl"></i></button>
-                        <button id="forward-btn" class="hover:scale-110 transition-transform hidden sm:block"><i class="fas fa-redo text-2xl"></i></button>
+                <div class="flex items-center justify-between mt-2">
+                    <div class="flex items-center gap-4 md:gap-6 text-white text-xl md:text-2xl">
+                        <button onclick="window.togglePlay()" class="hover:text-gray-300 transition w-8 text-center p-2"><i id="player-play-icon" class="fas fa-pause"></i></button>
+                        <button onclick="window.skip(-10)" class="hover:text-gray-300 transition p-2"><i class="fas fa-undo"></i><span class="text-[10px] block -mt-1 font-bold">10</span></button>
+                        <button onclick="window.skip(10)" class="hover:text-gray-300 transition p-2"><i class="fas fa-redo"></i><span class="text-[10px] block -mt-1 font-bold">10</span></button>
                         
-                        <!-- Volume Control -->
-                        <div class="flex items-center gap-3 group relative">
-                            <button id="mute-btn" class="hover:scale-110 transition-transform"><i class="fas fa-volume-up text-2xl"></i></button>
-                            <input type="range" id="volume-bar" class="w-20 bg-gray-600 rounded-lg appearance-none opacity-0 group-hover:opacity-100 transition-opacity absolute left-10" value="1" min="0" max="1" step="0.05">
+                        <!-- Volume (Desktop hover, mobile click to mute) -->
+                        <div class="relative group flex items-center p-2">
+                            <button id="mute-btn" onclick="window.toggleMute()" class="hover:text-gray-300 transition w-8 text-center"><i id="player-vol-icon" class="fas fa-volume-up"></i></button>
+                            <input type="range" id="player-volume-bar" value="1" min="0" max="1" step="0.1" class="w-0 opacity-0 group-hover:w-20 group-hover:opacity-100 transition-all duration-300 ml-2 hidden md:block">
                         </div>
                     </div>
 
-                    <div class="flex items-center gap-6 md:gap-8">
-                        <button class="hover:scale-110 transition-transform flex items-center gap-2 text-gray-300 hover:text-white font-medium">
-                            <i class="fas fa-step-forward text-2xl"></i>
-                            <span class="hidden md:inline">Next Episode</span>
-                        </button>
-                        <button id="fullscreen-btn" class="hover:scale-110 transition-transform"><i class="fas fa-expand text-2xl"></i></button>
+                    <div class="flex items-center gap-4 text-white text-xl md:text-2xl">
+                        <button onclick="window.toggleFullscreen()" class="hover:text-gray-300 transition p-2"><i id="player-fs-icon" class="fas fa-expand"></i></button>
                     </div>
-
                 </div>
             </div>
         </div>
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-        // Provided Configuration
+        // === Firebase Setup ===
         const firebaseConfig = {
             apiKey: "AIzaSyAJVq9E8tVo7qdavEdSgRZmBhMtcwrUa3k",
             authDomain: "duoflix-4c456.firebaseapp.com",
@@ -511,363 +374,246 @@
             messagingSenderId: "783837905937",
             appId: "1:783837905937:web:5e43ef409f320124689db0"
         };
-
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // State Variables
-        const APP_ID = 'duoflix_main'; 
+        // === State Variables ===
         const BASE_URL = 'https://api.themoviedb.org/3';
         const IMG_URL = 'https://image.tmdb.org/t/p/w500';
         const IMG_URL_ORIGINAL = 'https://image.tmdb.org/t/p/original';
         
-        // Netflix default & 14 unique generated avatars
-        const AVATARS = [
-            'https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png',
-            'https://api.dicebear.com/8.x/avataaars/svg?seed=Leo&backgroundColor=ffdfbf',
-            'https://api.dicebear.com/8.x/avataaars/svg?seed=Mia&backgroundColor=c0aede',
-            'https://api.dicebear.com/8.x/avataaars/svg?seed=Sam&backgroundColor=b6e3f4',
-            'https://api.dicebear.com/8.x/avataaars/svg?seed=Zoe&backgroundColor=ffdfbf',
-            'https://api.dicebear.com/8.x/avataaars/svg?seed=Max&backgroundColor=d1d4f9',
-            'https://api.dicebear.com/8.x/avataaars/svg?seed=Lia&backgroundColor=c0aede',
-            'https://api.dicebear.com/8.x/avataaars/svg?seed=Eli&backgroundColor=ffdfbf',
-            'https://api.dicebear.com/8.x/avataaars/svg?seed=Ava&backgroundColor=b6e3f4',
-            'https://api.dicebear.com/8.x/avataaars/svg?seed=Ian&backgroundColor=d1d4f9',
-            'https://api.dicebear.com/8.x/avataaars/svg?seed=Joy&backgroundColor=c0aede',
-            'https://api.dicebear.com/8.x/avataaars/svg?seed=Ray&backgroundColor=ffdfbf',
-            'https://api.dicebear.com/8.x/avataaars/svg?seed=Sue&backgroundColor=b6e3f4',
-            'https://api.dicebear.com/8.x/avataaars/svg?seed=Tom&backgroundColor=d1d4f9',
-            'https://api.dicebear.com/8.x/avataaars/svg?seed=Ann&backgroundColor=c0aede'
-        ];
-
-        window.currentUser = null;
-        let currentUserData = { avatar: AVATARS[0] }; 
         let API_KEY = localStorage.getItem('tmdb_api_key');
+        let currentUser = null;
+        let isLoginMode = true;
         let watchlist = [];
-        let continueWatching = {}; 
-        let currentMedia = null; 
+        let continueWatching = {};
+        
+        let currentMediaGlobal = null; 
         let searchTimeout = null;
-        let isFetching = false;
-        let authMode = 'login'; 
-        let selectedSignupAvatar = AVATARS[0];
-        let selectedSettingsAvatar = null;
 
-        // Firebase subscriptions
-        let unsubWatchlist = null;
-        let unsubProgress = null;
-        let unsubUser = null;
+        // 15 Premium Avatars for Profile
+        const avatars = [
+            "https://wallpapers.com/images/hd/netflix-profile-pictures-1000-x-1000-qo9h82134t9nv0j0.jpg",
+            "https://wallpapers.com/images/hd/netflix-profile-pictures-1000-x-1000-88wkdmjrorckekha.jpg",
+            "https://wallpapers.com/images/hd/netflix-profile-pictures-1000-x-1000-vnl1thqhqcgxqcmp.jpg",
+            "https://wallpapers.com/images/hd/netflix-profile-pictures-5yup5hd2i60x7ew3.jpg",
+            "https://prodigits.co.uk/thumb/wallpapers/p2/other/1390497576.jpg",
+            "https://i.pinimg.com/736x/c0/8e/6c/c08e6c9595e0322596e73629e5ed571a.jpg",
+            "https://i.pinimg.com/736x/db/70/dc/db70dc468af8c93749d1f587d74dcb08.jpg",
+            "https://i.pinimg.com/474x/d5/43/fa/d543fa3e1762c3e1db6e9aab3b5ce8aa.jpg",
+            "https://i.pinimg.com/474x/93/b5/e3/93b5e378fc7f3a97bd6603d7b47debd4.jpg",
+            "https://i.pinimg.com/736x/0b/df/97/0bdf97dd8b0fde40ab7ecbb3dfa09040.jpg",
+            "https://i.pinimg.com/474x/f3/f1/e2/f3f1e2f3d5cd4dfa8b0c82270ca09ee1.jpg",
+            "https://i.pinimg.com/474x/27/15/b7/2715b76cf60117042a3a58e594d40b4c.jpg",
+            "https://i.pinimg.com/474x/53/16/f5/5316f5c873fcd0cde103700b080536d5.jpg",
+            "https://i.pinimg.com/474x/c2/f7/b3/c2f7b3a7266a2082e01b3d0ee022ee7a.jpg",
+            "https://i.pinimg.com/474x/a4/08/90/a40890edc26fc4957f8641ba720619ed.jpg"
+        ];
+        let selectedAvatar = localStorage.getItem('user_avatar') || avatars[0];
 
-        // Endpoints
+        // API Endpoints
         const requests = {
             trending: `/trending/all/week`,
             netflixOriginals: `/discover/tv?with_networks=213`,
-            topRated: `/movie/top_rated`,
             actionMovies: `/discover/movie?with_genres=28`,
             comedyMovies: `/discover/movie?with_genres=35`,
-            horrorMovies: `/discover/movie?with_genres=27`,
+            horrorMovies: `/discover/movie?with_genres=27`
         };
 
-        // --- AUTHENTICATION LOGIC ---
-
-        function renderAvatarOptions(containerId, selectedAvatar, clickHandlerName) {
-            const container = document.getElementById(containerId);
-            container.innerHTML = AVATARS.map((url, index) => `
-                <img src="${url}" 
-                     class="avatar-option ${url === selectedAvatar ? 'selected' : ''}" 
-                     onclick="${clickHandlerName}('${url}')" 
-                     alt="Avatar ${index + 1}">
-            `).join('');
-        }
-
-        window.selectSignupAvatar = (url) => {
-            selectedSignupAvatar = url;
-            renderAvatarOptions('avatar-list', selectedSignupAvatar, 'selectSignupAvatar');
-        };
-
-        window.selectSettingsAvatar = (url) => {
-            selectedSettingsAvatar = url;
-            renderAvatarOptions('settings-avatar-list', selectedSettingsAvatar, 'selectSettingsAvatar');
-            document.getElementById('settings-current-avatar').src = url;
-        };
-
-        onAuthStateChanged(auth, (user) => {
-            const loader = document.getElementById('global-loader');
-            if (loader) loader.classList.add('hidden');
-
-            if (user) {
-                window.currentUser = user;
-                document.getElementById('auth-screen').classList.add('hidden');
-                document.getElementById('user-email-display').innerText = user.email;
-                document.getElementById('settings-email').innerText = user.email;
-                
-                subscribeToUserData();
-
-                if (!API_KEY) {
-                    const modal = document.getElementById('api-setup-modal');
-                    modal.classList.remove('hidden');
-                    modal.classList.add('flex');
+        // === STREAMING_CHUNK:Initialization & Global Bindings ===
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('user-avatar-main').src = selectedAvatar;
+            
+            // Navbar Scroll Effect
+            window.addEventListener('scroll', () => {
+                const nav = document.getElementById('navbar');
+                if (window.scrollY > 50) {
+                    nav.classList.remove('nav-transparent');
+                    nav.classList.add('nav-black');
                 } else {
-                    document.getElementById('main-view').classList.remove('hidden');
-                    window.initApp();
+                    nav.classList.add('nav-transparent');
+                    nav.classList.remove('nav-black');
                 }
+            });
+
+            // Search Listener
+            document.getElementById('search-input').addEventListener('input', (e) => {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => window.handleSearch(e.target.value), 500);
+            });
+            
+            populateAvatars();
+        });
+
+        // Firebase Auth Listener
+        onAuthStateChanged(auth, async (user) => {
+            currentUser = user;
+            if (user) {
+                document.getElementById('auth-modal').classList.add('hidden');
+                document.getElementById('auth-modal').classList.remove('flex');
+                await loadUserData();
+                checkTMDBAndInit();
             } else {
-                window.currentUser = null;
-                cleanupData();
-                document.getElementById('auth-screen').classList.remove('hidden');
-                document.getElementById('main-view').classList.add('hidden');
+                document.getElementById('auth-modal').classList.remove('hidden');
+                document.getElementById('auth-modal').classList.add('flex');
                 document.getElementById('api-setup-modal').classList.add('hidden');
-                document.getElementById('watchlist-view').classList.add('hidden');
-                document.getElementById('search-results-view').classList.add('hidden');
-                renderAvatarOptions('avatar-list', selectedSignupAvatar, 'selectSignupAvatar');
             }
         });
 
-        window.toggleAuthMode = () => {
-            authMode = authMode === 'login' ? 'signup' : 'login';
-            document.getElementById('auth-title').innerText = authMode === 'login' ? 'Sign In' : 'Sign Up';
-            document.getElementById('auth-btn').innerText = authMode === 'login' ? 'Sign In' : 'Sign Up';
-            document.getElementById('auth-toggle-text').innerText = authMode === 'login' ? 'New to Duoflix?' : 'Already have an account?';
-            document.getElementById('auth-toggle-btn').innerText = authMode === 'login' ? 'Sign up now.' : 'Sign in.';
-            document.getElementById('auth-error-msg').classList.add('hidden');
-            
-            const avatarContainer = document.getElementById('avatar-selection-container');
-            if (authMode === 'signup') {
-                avatarContainer.classList.remove('hidden');
+        function checkTMDBAndInit() {
+            if (!API_KEY) {
+                document.getElementById('api-setup-modal').classList.remove('hidden');
+                document.getElementById('api-setup-modal').classList.add('flex');
             } else {
-                avatarContainer.classList.add('hidden');
+                initApp();
             }
-        };
+        }
 
-        window.handleAuth = async (e) => {
-            e.preventDefault();
+        async function initApp() {
+            try {
+                await buildHero();
+                await Promise.all([
+                    fetchAndBuildRow('Trending Now', requests.trending, 'trending'),
+                    fetchAndBuildRow('Action Thrillers', requests.actionMovies),
+                    fetchAndBuildRow('Comedies', requests.comedyMovies),
+                    fetchAndBuildRow('Horror', requests.horrorMovies)
+                ]);
+                buildContinueWatchingRow();
+            } catch (error) {
+                console.error("Init Error:", error);
+                if(error.message.includes("401")) {
+                    localStorage.removeItem('tmdb_api_key');
+                    API_KEY = null;
+                    checkTMDBAndInit();
+                }
+            }
+        }
+
+        // === STREAMING_CHUNK:Global Functions Mapping (Vital for Modules) ===
+        window.handleAuth = async () => {
             const email = document.getElementById('auth-email').value;
             const password = document.getElementById('auth-password').value;
-            const errorMsg = document.getElementById('auth-error-msg');
-            const btn = document.getElementById('auth-btn');
+            const errorDiv = document.getElementById('auth-error');
             
-            btn.disabled = true;
-            btn.innerText = "Please wait...";
-            
+            if(!email || !password) {
+                showError("Please enter both email and password.");
+                return;
+            }
+
             try {
-                if (authMode === 'login') {
+                if (isLoginMode) {
                     await signInWithEmailAndPassword(auth, email, password);
                 } else {
-                    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                    await setDoc(doc(db, 'artifacts', APP_ID, 'users', userCredential.user.uid, 'profile', 'info'), {
-                        avatar: selectedSignupAvatar,
-                        createdAt: Date.now()
-                    });
+                    await createUserWithEmailAndPassword(auth, email, password);
                 }
-                errorMsg.classList.add('hidden');
             } catch (error) {
-                let friendlyMsg = "An error occurred. Please try again.";
-                
-                // Human-readable error messages for Firebase Auth
-                if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
-                    friendlyMsg = "Invalid email or password. Please try again.";
-                } else if (error.code === 'auth/email-already-in-use') {
-                    friendlyMsg = "An account already exists with this email. Please sign in.";
-                } else if (error.code === 'auth/weak-password') {
-                    friendlyMsg = "Password should be at least 6 characters long.";
-                } else if (error.code === 'auth/invalid-email') {
-                    friendlyMsg = "Please enter a valid email address.";
-                } else if (error.code === 'auth/too-many-requests') {
-                    friendlyMsg = "Too many failed attempts. Please try again later.";
-                } else {
-                    friendlyMsg = error.message.replace('Firebase: ', '');
-                }
-                
-                errorMsg.innerText = friendlyMsg;
-                errorMsg.classList.remove('hidden');
-            } finally {
-                btn.disabled = false;
-                btn.innerText = authMode === 'login' ? 'Sign In' : 'Sign Up';
+                let msg = "An error occurred.";
+                if(error.code === 'auth/invalid-credential') msg = "Invalid email or password.";
+                else if(error.code === 'auth/weak-password') msg = "Password must be at least 6 characters.";
+                else if(error.code === 'auth/email-already-in-use') msg = "Account already exists with this email.";
+                showError(msg);
             }
         };
 
-        window.logoutUser = async () => {
-            await signOut(auth);
-        };
-
-        // --- ACCOUNT SETTINGS ---
-        window.openAccountSettings = () => {
-            const modal = document.getElementById('account-settings-modal');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-            selectedSettingsAvatar = currentUserData.avatar;
-            document.getElementById('settings-current-avatar').src = selectedSettingsAvatar;
-            renderAvatarOptions('settings-avatar-list', selectedSettingsAvatar, 'selectSettingsAvatar');
-        };
-
-        window.closeAccountSettings = () => {
-            const modal = document.getElementById('account-settings-modal');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-        };
-
-        window.saveAccountSettings = async () => {
-             if (!window.currentUser) return;
-             try {
-                 await setDoc(doc(db, 'artifacts', APP_ID, 'users', window.currentUser.uid, 'profile', 'info'), {
-                     avatar: selectedSettingsAvatar,
-                     updatedAt: Date.now()
-                 }, { merge: true });
-                 window.closeAccountSettings();
-             } catch(e) {
-                 console.error("Error saving profile", e);
-             }
-        };
-
-        // --- FIRESTORE SYNC ---
-
-        function subscribeToUserData() {
-            if (!window.currentUser) return;
-            const uid = window.currentUser.uid;
-
-            // Profile Listener
-            const profileRef = doc(db, 'artifacts', APP_ID, 'users', uid, 'profile', 'info');
-            unsubUser = onSnapshot(profileRef, (doc) => {
-                if (doc.exists() && doc.data().avatar) {
-                    currentUserData.avatar = doc.data().avatar;
-                } else {
-                    currentUserData.avatar = AVATARS[0]; 
-                }
-                document.getElementById('nav-profile-img').src = currentUserData.avatar;
-                document.getElementById('dropdown-profile-img').src = currentUserData.avatar;
-            }, (error) => console.error("Profile sync error:", error));
-
-            // Watchlist Listener
-            const watchRef = collection(db, 'artifacts', APP_ID, 'users', uid, 'watchlist');
-            unsubWatchlist = onSnapshot(watchRef, (snapshot) => {
-                watchlist = [];
-                snapshot.forEach(doc => watchlist.push(doc.data()));
-                
-                if(currentMedia) {
-                    const isWatchlisted = watchlist.some(i => i.id === currentMedia.id && i.type === currentMedia.type);
-                    updateModalWatchlistUI(isWatchlisted);
-                }
-                
-                if (!document.getElementById('watchlist-view').classList.contains('hidden')) {
-                    window.showWatchlist();
-                }
-            }, (error) => console.error("Watchlist sync error:", error));
-
-            // Progress Listener
-            const progRef = collection(db, 'artifacts', APP_ID, 'users', uid, 'progress');
-            unsubProgress = onSnapshot(progRef, (snapshot) => {
-                continueWatching = {};
-                snapshot.forEach(doc => { continueWatching[doc.id] = doc.data(); });
-                window.buildContinueWatchingRow();
-            }, (error) => console.error("Progress sync error:", error));
+        function showError(msg) {
+            const errorDiv = document.getElementById('auth-error');
+            errorDiv.innerText = msg;
+            errorDiv.classList.remove('hidden');
         }
 
-        function cleanupData() {
-            if (unsubWatchlist) unsubWatchlist();
-            if (unsubProgress) unsubProgress();
-            if (unsubUser) unsubUser();
-            watchlist = [];
-            continueWatching = {};
-            document.getElementById('rows-container').innerHTML = '';
-        }
+        window.toggleAuthMode = () => {
+            isLoginMode = !isLoginMode;
+            document.getElementById('auth-title').innerText = isLoginMode ? 'Sign In' : 'Sign Up';
+            document.getElementById('auth-action-btn').innerText = isLoginMode ? 'Sign In' : 'Create Account';
+            document.getElementById('auth-switch-text').innerText = isLoginMode ? 'New to Duoflix?' : 'Already have an account?';
+            document.getElementById('auth-switch-btn').innerText = isLoginMode ? 'Sign up now.' : 'Sign in.';
+            document.getElementById('auth-error').classList.add('hidden');
+        };
 
-        // --- API KEY & TMDB ---
+        window.logout = () => signOut(auth);
 
-        window.saveApiKey = async () => {
-            const keyInput = document.getElementById('api-key-input');
-            const errorMsg = document.getElementById('api-error-msg');
-            const key = keyInput.value.trim();
-            
-            if (key.length > 15) {
-                errorMsg.classList.add('hidden');
-                keyInput.disabled = true;
-                try {
-                    const res = await fetch(`${BASE_URL}/configuration?api_key=${key}`);
-                    if(!res.ok) throw new Error("Invalid API Key");
-                    
-                    API_KEY = key;
-                    localStorage.setItem('tmdb_api_key', key);
-                    
-                    const modal = document.getElementById('api-setup-modal');
-                    modal.classList.add('hidden');
-                    modal.classList.remove('flex');
-                    document.getElementById('main-view').classList.remove('hidden');
-                    window.initApp();
-                } catch(e) {
-                    keyInput.disabled = false;
-                    errorMsg.innerText = "Invalid API Key. Please check and try again.";
-                    errorMsg.classList.remove('hidden');
-                }
-            } else {
-                errorMsg.innerText = "Please enter a valid API key string.";
-                errorMsg.classList.remove('hidden');
+        window.saveApiKey = () => {
+            const key = document.getElementById('api-key-input').value.trim();
+            if (key.length > 10) {
+                API_KEY = key;
+                localStorage.setItem('tmdb_api_key', key);
+                document.getElementById('api-setup-modal').classList.add('hidden');
+                document.getElementById('api-setup-modal').classList.remove('flex');
+                initApp();
             }
         };
 
+        window.clearApiKey = () => {
+            localStorage.removeItem('tmdb_api_key');
+            location.reload();
+        };
+
+        // Avatar Management
+        function populateAvatars() {
+            const grid = document.getElementById('avatar-grid');
+            grid.innerHTML = avatars.map(url => `
+                <img src="${url}" class="w-20 h-20 md:w-24 md:h-24 rounded cursor-pointer border-2 hover:border-white transition-all ${url === selectedAvatar ? 'border-netflix-red scale-110' : 'border-transparent'}" onclick="window.selectAvatar('${url}')">
+            `).join('');
+        }
+        window.openAvatarModal = () => { document.getElementById('avatar-modal').classList.remove('hidden'); document.getElementById('avatar-modal').classList.add('flex'); }
+        window.closeAvatarModal = () => { document.getElementById('avatar-modal').classList.add('hidden'); document.getElementById('avatar-modal').classList.remove('flex'); }
+        window.selectAvatar = (url) => {
+            selectedAvatar = url;
+            localStorage.setItem('user_avatar', url);
+            document.getElementById('user-avatar-main').src = url;
+            populateAvatars();
+            window.closeAvatarModal();
+        };
+
+        // Navigation
+        window.renderHome = () => { hideSearch(); window.hideWatchlist(); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+        window.scrollToSection = (id) => { hideSearch(); window.hideWatchlist(); document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'center' }); };
+        function scrollRow(rowId, offset) { document.getElementById(rowId).scrollBy({ left: offset, behavior: 'smooth' }); }
+        window.scrollRow = scrollRow;
+
+        // === STREAMING_CHUNK:Firestore Data Sync ===
+        async function loadUserData() {
+            if (!currentUser) return;
+            try {
+                const docRef = doc(db, "users", currentUser.uid);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    watchlist = data.watchlist || [];
+                    continueWatching = data.continueWatching || {};
+                }
+            } catch (e) { console.error("Error loading user data", e); }
+        }
+
+        async function syncUserData() {
+            if (!currentUser) return;
+            try {
+                await setDoc(doc(db, "users", currentUser.uid), { watchlist, continueWatching }, { merge: true });
+            } catch (e) { console.error("Sync Error", e); }
+        }
+
+        // === STREAMING_CHUNK:TMDB Data Fetching & UI Builders ===
         async function fetchTMDB(endpoint) {
-            const separator = endpoint.includes('?') ? '&' : '?';
-            const url = `${BASE_URL}${endpoint}${separator}api_key=${API_KEY}`;
+            const url = `${BASE_URL}${endpoint}${endpoint.includes('?') ? '&' : '?'}api_key=${API_KEY}`;
             const res = await fetch(url);
             if (!res.ok) throw new Error(`API Error: ${res.status}`);
             return await res.json();
         }
 
-        window.initApp = async () => {
-            if(isFetching) return;
-            isFetching = true;
-            try {
-                // Ensure rows are loaded safely without one failing the others
-                const safeFetch = async (title, endpoint, sectionId) => {
-                    try { await fetchAndBuildRow(title, endpoint, sectionId); } 
-                    catch(e) { console.error(`Failed row ${title}`); }
-                };
-
-                await Promise.all([
-                    safeFetch('Trending Now', requests.trending, 'trending'),
-                    safeFetch('Duoflix Originals', requests.netflixOriginals, 'tv-shows'),
-                    safeFetch('Top Rated', requests.topRated, 'movies'),
-                    safeFetch('Action & Adventure', requests.actionMovies),
-                    safeFetch('Comedies', requests.comedyMovies),
-                    safeFetch('Horror', requests.horrorMovies)
-                ]);
-                
-                window.buildContinueWatchingRow();
-                await buildHero();
-            } catch (error) {
-                console.error("Critical app init failure:", error);
-            }
-            isFetching = false;
-        };
-
-        // --- UI BUILDERS ---
-
         async function buildHero() {
-            const data = await fetchTMDB(requests.trending);
-            const validMovies = data.results.filter(m => m.backdrop_path && m.overview);
-            const randomMovie = validMovies[Math.floor(Math.random() * validMovies.length)];
+            const data = await fetchTMDB(requests.netflixOriginals);
+            const randomMovie = data.results[Math.floor(Math.random() * data.results.length)];
             
-            if(!randomMovie) return;
-
             const hero = document.getElementById('hero-banner');
-            const title = document.getElementById('hero-title');
-            const overview = document.getElementById('hero-overview');
-            const playBtn = document.getElementById('hero-play-btn');
-            const infoBtn = document.getElementById('hero-info-btn');
-
-            const imgUrl = `${IMG_URL_ORIGINAL}${randomMovie.backdrop_path}`;
-            const img = new Image();
-            img.onload = () => {
-                hero.style.backgroundImage = `url('${imgUrl}')`;
-                hero.classList.remove('skeleton');
-            };
-            img.src = imgUrl;
+            hero.style.backgroundImage = `url('${IMG_URL_ORIGINAL}${randomMovie.backdrop_path}')`;
+            hero.classList.remove('skeleton');
             
-            title.innerText = randomMovie.name || randomMovie.title || randomMovie.original_name;
-            overview.innerText = truncate(randomMovie.overview, 180);
+            document.getElementById('hero-title').innerText = randomMovie.name || randomMovie.title;
+            document.getElementById('hero-overview').innerText = randomMovie.overview;
 
-            const type = randomMovie.media_type || 'movie';
-            playBtn.onclick = () => window.playMedia(randomMovie.id, type, title.innerText);
-            infoBtn.onclick = () => window.openDetailsModal(randomMovie.id, type);
+            document.getElementById('hero-play-btn').onclick = () => window.playMedia(randomMovie.id, 'tv', randomMovie.name);
+            document.getElementById('hero-info-btn').onclick = () => window.openDetailsModal(randomMovie.id, 'tv');
         }
 
         async function fetchAndBuildRow(title, endpoint, sectionId = null) {
@@ -875,538 +621,341 @@
             const rowId = `row-${Math.random().toString(36).substr(2, 9)}`;
             
             let rowHTML = `
-                <div class="row relative group/row" ${sectionId ? `id="${sectionId}"` : ''}>
-                    <h2 class="text-lg md:text-xl font-bold mb-2 ml-4 md:ml-0 text-gray-100 drop-shadow-md tracking-wide">${title}</h2>
-                    <div class="relative">
-                        <button class="absolute left-0 top-0 bottom-0 w-12 md:w-16 bg-gradient-to-r from-[#141414] via-[#141414]/90 to-transparent z-20 text-white opacity-0 group-hover/row:opacity-100 transition-all duration-300 flex items-center justify-center hover:w-20 hidden md:flex" onclick="scrollRow('${rowId}', -400)">
-                            <i class="fas fa-chevron-left text-3xl drop-shadow-[0_0_10px_rgba(0,0,0,1)] hover:scale-125 transition-transform"></i>
-                        </button>
+                <div class="row w-full" ${sectionId ? `id="${sectionId}"` : ''}>
+                    <h2 class="text-lg md:text-2xl font-bold mb-2 ml-4 md:ml-0 text-gray-200">${title}</h2>
+                    <div class="relative group">
+                        <button class="hidden md:flex absolute left-0 top-0 bottom-0 w-12 bg-black/60 z-20 text-white opacity-0 group-hover:opacity-100 transition items-center justify-center hover:bg-black/90 hover:w-16" onclick="window.scrollRow('${rowId}', -400)"><i class="fas fa-chevron-left text-3xl"></i></button>
                         
-                        <div id="${rowId}" class="row-posters pl-4 md:pl-0">
-                            ${Array(8).fill('<div class="skeleton row-poster"></div>').join('')}
+                        <div id="${rowId}" class="row-posters pl-4 md:pl-0 pr-4 md:pr-0 pb-4">
+                            ${Array(8).fill('<div class="skeleton row-poster-wide"></div>').join('')}
                         </div>
                         
-                        <button class="absolute right-0 top-0 bottom-0 w-12 md:w-16 bg-gradient-to-l from-[#141414] via-[#141414]/90 to-transparent z-20 text-white opacity-0 group-hover/row:opacity-100 transition-all duration-300 flex items-center justify-center hover:w-20 hidden md:flex" onclick="scrollRow('${rowId}', 400)">
-                            <i class="fas fa-chevron-right text-3xl drop-shadow-[0_0_10px_rgba(0,0,0,1)] hover:scale-125 transition-transform"></i>
-                        </button>
+                        <button class="hidden md:flex absolute right-0 top-0 bottom-0 w-12 bg-black/60 z-20 text-white opacity-0 group-hover:opacity-100 transition items-center justify-center hover:bg-black/90 hover:w-16" onclick="window.scrollRow('${rowId}', 400)"><i class="fas fa-chevron-right text-3xl"></i></button>
                     </div>
                 </div>
             `;
             container.insertAdjacentHTML('beforeend', rowHTML);
 
-            const data = await fetchTMDB(endpoint);
-            const rowElement = document.getElementById(rowId);
-            
-            rowElement.innerHTML = data.results.map(movie => {
-                const imgPath = movie.backdrop_path || movie.poster_path; 
-                if (!imgPath) return ''; 
-                const type = movie.media_type || (endpoint.includes('tv') ? 'tv' : 'movie');
-                const titleText = movie.name || movie.title || '';
-                
-                return `
-                <div class="row-poster group relative overflow-hidden" onclick="openDetailsModal(${movie.id}, '${type}')">
-                    <img src="${IMG_URL}${imgPath}" alt="${titleText}" class="w-full h-full object-cover rounded-md" loading="lazy">
-                    <div class="poster-title-overlay">
-                        <p class="poster-title-text">${titleText}</p>
-                    </div>
-                </div>`;
-            }).join('');
+            try {
+                const data = await fetchTMDB(endpoint);
+                document.getElementById(rowId).innerHTML = data.results.map(movie => {
+                    if (!movie.backdrop_path) return '';
+                    const type = movie.media_type || (endpoint.includes('tv') ? 'tv' : 'movie');
+                    const titleStr = movie.name || movie.title;
+                    return `
+                        <div class="relative group flex-shrink-0 cursor-pointer" onclick="window.openDetailsModal(${movie.id}, '${type}')">
+                            <img src="${IMG_URL}${movie.backdrop_path}" class="row-poster-wide bg-[#222]">
+                            <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black via-black/80 to-transparent p-3 pt-8 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-b">
+                                <h3 class="text-white text-sm font-bold truncate">${titleStr}</h3>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (e) {
+                document.getElementById(rowId).innerHTML = '<p class="text-gray-500 pl-4">Failed to load content.</p>';
+            }
         }
 
-        window.buildContinueWatchingRow = () => {
+        function buildContinueWatchingRow() {
             const items = Object.values(continueWatching).sort((a, b) => b.timestamp - a.timestamp);
-            const existing = document.getElementById('continue-watching-wrapper');
-            if (items.length === 0) {
-                if(existing) existing.remove();
-                return;
-            }
-
             const container = document.getElementById('rows-container');
-            const rowId = 'row-continue-watching';
+            const existing = document.getElementById('continue-watching');
+            if (existing) existing.remove();
             
+            if (items.length === 0) return;
+
+            const rowId = 'row-cw';
             let rowHTML = `
-                <div class="row relative group/row" id="continue-watching-wrapper">
-                    <h2 class="text-lg md:text-xl font-bold mb-2 ml-4 md:ml-0 text-white drop-shadow-md tracking-wide">Continue Watching</h2>
-                    <div class="relative">
-                        <button class="absolute left-0 top-0 bottom-0 w-12 md:w-16 bg-gradient-to-r from-[#141414] via-[#141414]/90 to-transparent z-20 text-white opacity-0 group-hover/row:opacity-100 transition-all duration-300 flex items-center justify-center hover:w-20 hidden md:flex" onclick="scrollRow('${rowId}', -400)">
-                            <i class="fas fa-chevron-left text-3xl hover:scale-125 transition-transform"></i>
-                        </button>
+                <div class="row w-full" id="continue-watching">
+                    <h2 class="text-lg md:text-2xl font-bold mb-2 ml-4 md:ml-0 text-white">Continue Watching</h2>
+                    <div class="relative group">
+                        <button class="hidden md:flex absolute left-0 top-0 bottom-0 w-12 bg-black/60 z-20 text-white opacity-0 group-hover:opacity-100 transition items-center justify-center hover:bg-black/90 hover:w-16" onclick="window.scrollRow('${rowId}', -400)"><i class="fas fa-chevron-left text-3xl"></i></button>
                         
-                        <div id="${rowId}" class="row-posters pl-4 md:pl-0">
+                        <div id="${rowId}" class="row-posters pl-4 md:pl-0 pr-4 md:pr-0 pb-4">
                             ${items.map(item => `
-                                <div class="row-poster group" onclick="openDetailsModal(${item.id}, '${item.type}')">
-                                    <img src="${item.backdrop}" class="w-full h-full object-cover rounded-md opacity-80 group-hover:opacity-100 transition-opacity duration-300" loading="lazy">
-                                    <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/20">
-                                        <div class="bg-black/60 backdrop-blur-sm rounded-full w-12 h-12 flex items-center justify-center border border-white/50 shadow-xl hover:scale-110 transition-transform">
-                                            <i class="fas fa-play text-white ml-1 text-lg"></i>
+                                <div class="relative group flex-shrink-0 cursor-pointer" onclick="window.playMedia(${item.id}, '${item.type}', '${item.title}', null, null, ${item.progress})">
+                                    <div class="row-poster-wide relative overflow-hidden bg-[#222]">
+                                        <img src="${item.backdrop}" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition">
+                                        <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition bg-black/30">
+                                            <div class="bg-black/70 rounded-full w-12 h-12 flex items-center justify-center border border-white"><i class="fas fa-play text-white ml-1"></i></div>
                                         </div>
+                                        <div class="progress-container"><div class="progress-bar" style="width: ${(item.progress / item.duration) * 100}%"></div></div>
                                     </div>
-                                    <div class="poster-title-overlay">
-                                        <p class="poster-title-text">${item.title}</p>
-                                    </div>
-                                    <div class="progress-container"><div class="progress-bar shadow-[0_0_10px_#E50914]" style="width: ${(item.progress / item.duration) * 100}%"></div></div>
-                                    ${item.type === 'tv' ? `<span class="absolute top-2 right-2 bg-black/80 backdrop-blur-md px-1.5 py-0.5 text-[10px] md:text-xs rounded font-bold shadow-md border border-gray-700 text-white z-10">S${item.season} E${item.episode}</span>` : ''}
+                                    <h3 class="text-white text-xs mt-2 truncate w-full px-1">${item.title}</h3>
                                 </div>
                             `).join('')}
                         </div>
                         
-                        <button class="absolute right-0 top-0 bottom-0 w-12 md:w-16 bg-gradient-to-l from-[#141414] via-[#141414]/90 to-transparent z-20 text-white opacity-0 group-hover/row:opacity-100 transition-all duration-300 flex items-center justify-center hover:w-20 hidden md:flex" onclick="scrollRow('${rowId}', 400)">
-                            <i class="fas fa-chevron-right text-3xl hover:scale-125 transition-transform"></i>
-                        </button>
+                        <button class="hidden md:flex absolute right-0 top-0 bottom-0 w-12 bg-black/60 z-20 text-white opacity-0 group-hover:opacity-100 transition items-center justify-center hover:bg-black/90 hover:w-16" onclick="window.scrollRow('${rowId}', 400)"><i class="fas fa-chevron-right text-3xl"></i></button>
                     </div>
                 </div>
             `;
-            
-            if(existing) existing.remove();
             container.insertAdjacentHTML('afterbegin', rowHTML);
-        };
+        }
 
-        // --- UTILS & INTERACTIONS ---
-
-        window.scrollRow = (rowId, offset) => { document.getElementById(rowId).scrollBy({ left: offset, behavior: 'smooth' }); };
-        function truncate(str, n) { return str?.length > n ? str.substr(0, n - 1) + "..." : str; }
-        
-        window.scrollToSection = (id) => {
-            window.hideSearch();
-            window.hideWatchlist();
-            const el = document.getElementById(id);
-            if(el) window.scrollTo({top: el.getBoundingClientRect().top + window.scrollY - 100, behavior: 'smooth'});
-        };
-
-        window.renderHome = () => {
-            window.hideSearch();
-            window.hideWatchlist();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        };
-
-        // Glassmorphism Scroll
-        window.addEventListener('scroll', () => {
-            const nav = document.getElementById('navbar');
-            if (window.scrollY > 50) { nav.classList.remove('nav-transparent'); nav.classList.add('nav-black'); } 
-            else { nav.classList.add('nav-transparent'); nav.classList.remove('nav-black'); }
-        });
-
-        // Search logic
-        document.getElementById('search-input').addEventListener('input', (e) => {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(() => handleSearch(e.target.value), 500);
-        });
-
+        // === STREAMING_CHUNK:Search & Watchlist Logic ===
+        let searchActive = false;
         window.toggleSearch = () => {
             const box = document.getElementById('search-box');
+            const icon = document.getElementById('search-icon');
             if (box.classList.contains('hidden')) {
-                box.classList.remove('hidden'); document.getElementById('search-icon').classList.add('hidden');
-                document.getElementById('search-input').focus();
-            } else { window.hideSearch(); }
+                box.classList.remove('hidden'); icon.classList.add('hidden'); document.getElementById('search-input').focus();
+            } else { hideSearch(); }
         };
 
-        window.hideSearch = () => {
+        function hideSearch() {
             document.getElementById('search-box').classList.add('hidden');
             document.getElementById('search-icon').classList.remove('hidden');
             document.getElementById('search-input').value = '';
             document.getElementById('search-results-view').classList.add('hidden');
-            if(window.currentUser) document.getElementById('main-view').classList.remove('hidden');
-        };
+            document.getElementById('main-view').classList.remove('hidden');
+        }
 
-        async function handleSearch(query) {
-            if (!query || query.trim().length < 2) { window.hideSearch(); return; }
+        window.handleSearch = async (query) => {
+            if (!query || query.length < 2) { hideSearch(); return; }
             document.getElementById('main-view').classList.add('hidden');
             document.getElementById('watchlist-view').classList.add('hidden');
             document.getElementById('search-results-view').classList.remove('hidden');
             document.getElementById('search-query-display').innerText = query;
 
             const grid = document.getElementById('search-grid');
-            grid.innerHTML = Array(12).fill('<div class="skeleton aspect-video rounded-md"></div>').join('');
+            grid.innerHTML = Array(10).fill('<div class="skeleton aspect-wide rounded"></div>').join('');
 
             try {
                 const data = await fetchTMDB(`/search/multi?query=${encodeURIComponent(query)}`);
-                const results = data.results.filter(i => (i.backdrop_path || i.poster_path) && (i.media_type === 'movie' || i.media_type === 'tv'));
-                
-                if (results.length === 0) { grid.innerHTML = '<p class="col-span-full text-gray-500 text-center py-20 text-xl">No matching titles found.</p>'; return; }
+                const results = data.results.filter(i => i.backdrop_path && (i.media_type === 'movie' || i.media_type === 'tv'));
+                if (results.length === 0) { grid.innerHTML = '<p class="col-span-full text-center text-gray-500 py-10">No results found.</p>'; return; }
 
-                grid.innerHTML = results.map(item => {
-                    const imgPath = item.backdrop_path || item.poster_path;
-                    return `
-                    <div class="relative group cursor-pointer transition-transform duration-300 hover:scale-105 hover:z-30 rounded-md overflow-hidden shadow-lg aspect-video" onclick="openDetailsModal(${item.id}, '${item.media_type}')">
-                        <img src="${IMG_URL}${imgPath}" class="w-full h-full object-cover">
-                        <div class="poster-title-overlay"><p class="poster-title-text">${item.title || item.name}</p></div>
+                grid.innerHTML = results.map(item => `
+                    <div class="relative group cursor-pointer aspect-wide rounded overflow-hidden" onclick="window.openDetailsModal(${item.id}, '${item.media_type}')">
+                        <img src="${IMG_URL}${item.backdrop_path}" class="w-full h-full object-cover transition transform group-hover:scale-110">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent flex items-end p-2 opacity-0 group-hover:opacity-100 transition">
+                            <h3 class="text-white font-bold text-xs truncate">${item.title || item.name}</h3>
+                        </div>
                     </div>
-                `}).join('');
-            } catch(e) { grid.innerHTML = '<p class="col-span-full text-red-500 text-center py-10">Network error.</p>'; }
-        }
+                `).join('');
+            } catch(e) { grid.innerHTML = '<p class="col-span-full text-red-500">Error loading search.</p>'; }
+        };
 
-        // --- WATCHLIST LOGIC ---
-        
         window.showWatchlist = () => {
-            window.hideSearch();
+            hideSearch();
             document.getElementById('main-view').classList.add('hidden');
             document.getElementById('watchlist-view').classList.remove('hidden');
+            window.scrollTo(0,0);
             
             const grid = document.getElementById('watchlist-grid');
             if (watchlist.length === 0) {
-                grid.innerHTML = '<div class="col-span-full flex flex-col items-center justify-center py-32"><i class="fas fa-bookmark text-7xl text-gray-800 mb-6 drop-shadow-md"></i><p class="text-gray-400 text-2xl font-medium">Your watchlist is empty.</p><button onclick="renderHome()" class="mt-8 bg-white text-black px-6 py-2 rounded font-bold hover:bg-gray-200 transition">Explore Titles</button></div>';
+                grid.innerHTML = '<div class="col-span-full flex flex-col items-center py-20"><i class="fas fa-list text-5xl text-gray-700 mb-4"></i><p class="text-gray-500">Your list is empty.</p></div>';
                 return;
             }
 
             grid.innerHTML = watchlist.map(item => `
-                <div class="relative group cursor-pointer transition-transform duration-300 hover:scale-105 hover:z-30 rounded-md overflow-hidden shadow-lg aspect-video" onclick="openDetailsModal(${item.id}, '${item.type}')">
-                    <img src="${item.poster}" class="w-full h-full object-cover">
-                    <div class="poster-title-overlay"><p class="poster-title-text">${item.title}</p></div>
+                <div class="relative group cursor-pointer aspect-wide rounded overflow-hidden" onclick="window.openDetailsModal(${item.id}, '${item.type}')">
+                    <img src="${item.backdrop}" class="w-full h-full object-cover transition transform group-hover:scale-110">
+                    <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex flex-col justify-center items-center transition p-2 text-center">
+                        <div class="bg-white/20 backdrop-blur rounded-full w-10 h-10 flex items-center justify-center mb-2"><i class="fas fa-play text-white ml-1"></i></div>
+                        <h3 class="text-white font-bold text-xs truncate w-full">${item.title}</h3>
+                    </div>
                 </div>
             `).join('');
         };
+        window.hideWatchlist = () => { document.getElementById('watchlist-view').classList.add('hidden'); document.getElementById('main-view').classList.remove('hidden'); };
 
-        window.hideWatchlist = () => {
-            document.getElementById('watchlist-view').classList.add('hidden');
-            if(window.currentUser) document.getElementById('main-view').classList.remove('hidden');
-        };
-
-        window.toggleWatchlist = async (media) => {
-            if (!window.currentUser) return;
-            const isWatchlisted = watchlist.some(i => i.id === media.id && i.type === media.type);
-            const docRef = doc(db, 'artifacts', APP_ID, 'users', window.currentUser.uid, 'watchlist', media.id.toString());
-            
-            // Optimistic UI Update
-            updateModalWatchlistUI(!isWatchlisted);
-
-            try {
-                if (isWatchlisted) {
-                    await deleteDoc(docRef);
-                } else {
-                    const newItem = {
-                        id: media.id,
-                        type: media.type,
-                        title: media.title || media.name,
-                        poster: `${IMG_URL}${media.backdrop_path || media.poster_path}`,
-                        timestamp: Date.now()
-                    };
-                    await setDoc(docRef, newItem);
-                }
-            } catch(e) { 
-                console.error("Error updating watchlist:", e); 
-                updateModalWatchlistUI(isWatchlisted); // Rollback on error
-            }
-        };
-
-        function updateModalWatchlistUI(isWatchlisted) {
-            const icon = document.getElementById('modal-add-icon');
-            const btn = document.getElementById('modal-add-btn');
-            
-            if(!icon || !btn) return;
-            
-            // Remove both classes first to ensure clean state
-            icon.classList.remove('fa-plus', 'fa-check');
-            
-            if (isWatchlisted) {
-                icon.classList.add('fa-check');
-                btn.classList.remove('bg-[#2a2a2a]/80', 'text-white');
-                btn.classList.add('bg-white', 'text-black');
-            } else {
-                icon.classList.add('fa-plus');
-                btn.classList.remove('bg-white', 'text-black');
-                btn.classList.add('bg-[#2a2a2a]/80', 'text-white');
-            }
-        }
-
-        // --- MODALS & PLAYER ---
-
+        // === STREAMING_CHUNK:Modal Details & Watchlist Action ===
         window.openDetailsModal = async (id, type) => {
             const modal = document.getElementById('details-modal');
             modal.classList.remove('hidden');
-            document.body.style.overflow = 'hidden'; 
+            document.body.style.overflow = 'hidden';
             
             document.getElementById('modal-backdrop').style.backgroundImage = 'none';
             document.getElementById('modal-backdrop').classList.add('skeleton');
-            document.getElementById('modal-title').innerText = '';
-            document.getElementById('modal-overview').innerText = 'Loading...';
-            document.getElementById('tv-controls').classList.add('hidden');
-            document.getElementById('modal-similar').innerHTML = '';
             
             try {
-                const [details, credits, similar] = await Promise.all([
-                    fetchTMDB(`/${type}/${id}`), fetchTMDB(`/${type}/${id}/credits`), fetchTMDB(`/${type}/${id}/similar`)
+                const [details, credits] = await Promise.all([
+                    fetchTMDB(`/${type}/${id}`), fetchTMDB(`/${type}/${id}/credits`)
                 ]);
-
-                currentMedia = { ...details, type };
-
+                currentMediaGlobal = { ...details, type };
+                
                 if (details.backdrop_path) {
-                    const bgUrl = `${IMG_URL_ORIGINAL}${details.backdrop_path}`;
-                    const img = new Image();
-                    img.onload = () => {
-                        document.getElementById('modal-backdrop').style.backgroundImage = `url('${bgUrl}')`;
-                        document.getElementById('modal-backdrop').classList.remove('skeleton');
-                    };
-                    img.src = bgUrl;
-                } else {
-                     document.getElementById('modal-backdrop').classList.remove('skeleton');
-                     document.getElementById('modal-backdrop').style.backgroundColor = '#222';
+                    document.getElementById('modal-backdrop').style.backgroundImage = `url('${IMG_URL_ORIGINAL}${details.backdrop_path}')`;
+                    document.getElementById('modal-backdrop').style.backgroundSize = 'cover';
                 }
+                document.getElementById('modal-backdrop').classList.remove('skeleton');
                 
                 const title = details.title || details.name;
                 document.getElementById('modal-title').innerText = title;
                 document.getElementById('modal-year').innerText = (details.release_date || details.first_air_date || '').substring(0,4);
-                document.getElementById('modal-rating').innerText = details.adult ? '18+' : (type === 'movie' ? 'PG-13' : 'TV-MA');
+                document.getElementById('modal-rating').innerText = type === 'movie' ? 'PG-13' : 'TV-MA';
                 
-                let runtimeStr = '';
-                if (type === 'movie' && details.runtime) runtimeStr = `${Math.floor(details.runtime / 60)}h ${details.runtime % 60}m`;
-                else if (type === 'tv' && details.number_of_seasons) runtimeStr = `${details.number_of_seasons} Season${details.number_of_seasons > 1 ? 's' : ''}`;
-                document.getElementById('modal-runtime').innerText = runtimeStr;
-                
-                // Programmatically attach click handlers
-                document.getElementById('modal-play-btn').onclick = () => {
-                    if (type === 'tv') {
-                        const select = document.getElementById('season-selector');
-                        const season = select ? select.value : 1;
-                        const prog = continueWatching[id];
-                        if (prog && prog.season && prog.episode) playMedia(id, 'tv', title, prog.season, prog.episode, prog.progress);
-                        else playMedia(id, 'tv', title, season, 1);
-                    } else {
-                        const prog = continueWatching[id];
-                        playMedia(id, 'movie', title, null, null, prog ? prog.progress : 0);
-                    }
-                };
-                
-                document.getElementById('modal-add-btn').onclick = () => window.toggleWatchlist(currentMedia);
+                document.getElementById('modal-play-btn').onclick = () => window.playMedia(id, type, title);
 
-                const isWatchlisted = watchlist.some(i => i.id === id && i.type === type);
-                updateModalWatchlistUI(isWatchlisted);
+                // Watchlist Icon Setup
+                const isWatchlisted = watchlist.some(i => i.id === id);
+                const addIcon = document.getElementById('modal-add-icon');
+                addIcon.className = isWatchlisted ? 'fas fa-check' : 'fas fa-plus';
 
                 document.getElementById('modal-overview').innerText = details.overview || 'No overview available.';
-                document.getElementById('modal-cast').innerText = credits.cast.slice(0, 5).map(c => c.name).join(', ') || 'N/A';
+                document.getElementById('modal-cast').innerText = credits.cast.slice(0, 4).map(c => c.name).join(', ') || 'Unknown';
                 document.getElementById('modal-genres').innerText = details.genres.map(g => g.name).join(', ') || 'Various';
 
-                if (type === 'tv' && details.seasons) {
-                    document.getElementById('tv-controls').classList.remove('hidden');
-                    const selector = document.getElementById('season-selector');
-                    selector.innerHTML = details.seasons.filter(s => s.season_number > 0).map(s => `<option value="${s.season_number}">Season ${s.season_number}</option>`).join('');
-                    
-                    const prog = continueWatching[id];
-                    if (prog && prog.season) selector.value = prog.season;
-                    await window.loadEpisodes(selector.value);
-                }
-
-                document.getElementById('modal-similar').innerHTML = similar.results.slice(0, 6).map(item => {
-                    if(!item.backdrop_path && !item.poster_path) return '';
-                    return `
-                        <div class="bg-[#222] rounded-lg overflow-hidden cursor-pointer hover:bg-[#333] transition-all hover:scale-105 border border-gray-800 shadow-lg relative" onclick="openDetailsModal(${item.id}, '${type}')">
-                            <img src="${IMG_URL}${item.backdrop_path || item.poster_path}" class="w-full aspect-video object-cover" loading="lazy">
-                            <div class="poster-title-overlay"><p class="poster-title-text">${item.title || item.name}</p></div>
-                        </div>
-                    `;
-                }).join('');
-
-            } catch (error) { console.error("Error:", error); }
-        };
-
-        window.loadEpisodes = async (seasonNumber) => {
-            if (!currentMedia) return;
-            const container = document.getElementById('episodes-list');
-            container.innerHTML = '<div class="text-center py-10 text-gray-500"><i class="fas fa-spinner fa-spin text-3xl"></i></div>';
-            
-            try {
-                const data = await fetchTMDB(`/tv/${currentMedia.id}/season/${seasonNumber}`);
-                const prog = continueWatching[currentMedia.id];
-                
-                container.innerHTML = data.episodes.map(ep => {
-                    const isLastWatched = prog && prog.season == seasonNumber && prog.episode == ep.episode_number;
-                    const progressPercent = isLastWatched && prog.duration ? (prog.progress / prog.duration) * 100 : 0;
-                    
-                    return `
-                    <div class="flex items-center p-4 border-b border-gray-800 cursor-pointer rounded-lg hover:bg-[#333] transition-colors group/ep" onclick="playMedia(${currentMedia.id}, 'tv', '${currentMedia.name.replace(/'/g, "\\'")}', ${seasonNumber}, ${ep.episode_number})">
-                        <div class="text-2xl font-bold text-gray-600 w-12 text-center group-hover/ep:text-white">${ep.episode_number}</div>
-                        <div class="relative w-36 aspect-video bg-[#111] flex-shrink-0 rounded-md overflow-hidden border border-gray-700">
-                            ${ep.still_path ? `<img src="${IMG_URL}${ep.still_path}" class="w-full h-full object-cover">` : ''}
-                            <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/ep:opacity-100 transition-opacity"><i class="fas fa-play text-white text-xl"></i></div>
-                            ${isLastWatched ? `<div class="progress-container"><div class="progress-bar" style="width: ${progressPercent}%"></div></div>` : ''}
-                        </div>
-                        <div class="ml-5 flex-grow pr-2">
-                            <div class="flex justify-between items-center mb-1"><h4 class="font-bold text-white text-base truncate">${ep.name}</h4><span class="text-xs text-gray-400">${ep.runtime || '--'}m</span></div>
-                            <p class="text-xs text-gray-400 line-clamp-2 mt-1 leading-relaxed">${ep.overview}</p>
-                        </div>
-                    </div>
-                `}).join('');
-            } catch (e) { container.innerHTML = '<p class="text-red-500 p-4">Failed to load.</p>'; }
+            } catch (e) { console.error(e); }
         };
 
         window.closeModal = () => {
             document.getElementById('details-modal').classList.add('hidden');
             document.body.style.overflow = 'auto';
-            currentMedia = null;
+            currentMediaGlobal = null;
         };
 
-        // --- CUSTOM PLAYER WRAPPER ---
-        
-        let currentlyPlaying = null; 
-        let lastSaveTime = 0; 
-        let playerIdleTimeout;
-        const playerWrapper = document.getElementById('player-wrapper');
-        const customVideo = document.getElementById('custom-video');
-        
-        // Player UI Elements
-        const playPauseBtn = document.getElementById('play-pause-btn');
-        const seekBar = document.getElementById('seek-bar');
-        const timeCurrent = document.getElementById('time-current');
-        const timeTotal = document.getElementById('time-total');
-        const muteBtn = document.getElementById('mute-btn');
-        const volumeBar = document.getElementById('volume-bar');
-        const fullscreenBtn = document.getElementById('fullscreen-btn');
-        const rewindBtn = document.getElementById('rewind-btn');
-        const forwardBtn = document.getElementById('forward-btn');
-
-        function resetPlayerIdle() {
-            playerWrapper.classList.remove('player-idle');
-            clearTimeout(playerIdleTimeout);
-            if (!customVideo.paused) {
-                playerIdleTimeout = setTimeout(() => {
-                    playerWrapper.classList.add('player-idle');
-                }, 3000);
-            }
-        }
-
-        playerWrapper.addEventListener('mousemove', resetPlayerIdle);
-        playerWrapper.addEventListener('click', resetPlayerIdle);
-        playerWrapper.addEventListener('touchstart', resetPlayerIdle);
-
-        function formatTime(seconds) {
-            if (isNaN(seconds)) return "0:00";
-            const min = Math.floor(seconds / 60);
-            const sec = Math.floor(seconds % 60);
-            return `${min}:${sec < 10 ? '0' : ''}${sec}`;
-        }
-
-        window.playMedia = (id, type, title, season = null, episode = null, startTime = 0) => {
-            window.closeModal();
-            playerWrapper.classList.remove('hidden');
-            playerWrapper.classList.add('flex');
-            document.body.style.overflow = 'hidden';
+        window.toggleWatchlistAction = () => {
+            if (!currentMediaGlobal) return;
+            const index = watchlist.findIndex(i => i.id === currentMediaGlobal.id);
+            const icon = document.getElementById('modal-add-icon');
             
-            currentlyPlaying = { id, type, title, season, episode, backdrop: currentMedia?.backdrop_path ? `${IMG_URL}${currentMedia.backdrop_path}` : null };
-            
-            if (type === 'movie') {
-                document.getElementById('player-custom-title').innerText = title;
+            if (index > -1) {
+                watchlist.splice(index, 1);
+                icon.className = 'fas fa-plus';
             } else {
-                document.getElementById('player-custom-title').innerText = `${title} - S${season} E${episode}`;
+                watchlist.push({
+                    id: currentMediaGlobal.id,
+                    type: currentMediaGlobal.type,
+                    title: currentMediaGlobal.title || currentMediaGlobal.name,
+                    backdrop: `${IMG_URL}${currentMediaGlobal.backdrop_path || currentMediaGlobal.poster_path}`
+                });
+                icon.className = 'fas fa-check';
             }
-
-            // Setting the demo video source
-            customVideo.src = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
-            customVideo.currentTime = startTime;
+            syncUserData();
             
-            // Wait for metadata to load total time
-            customVideo.onloadedmetadata = () => {
-                timeTotal.innerText = formatTime(customVideo.duration);
-                seekBar.max = customVideo.duration;
+            // Auto refresh watchlist view if open
+            if(!document.getElementById('watchlist-view').classList.contains('hidden')) {
+                window.showWatchlist();
+            }
+        };
+
+        // === STREAMING_CHUNK:Custom Video Player Logic ===
+        let currentlyPlaying = null;
+        let saveInterval = null;
+        let idleTimeout = null;
+        const customVideo = document.getElementById('custom-video');
+        const playerWrapper = document.getElementById('player-controls-wrapper');
+        const seekBar = document.getElementById('player-seek-bar');
+
+        window.playMedia = (id, type, title, season=null, ep=null, startTime=0) => {
+            window.closeModal();
+            const playerOverlay = document.getElementById('custom-player-container');
+            playerOverlay.classList.remove('hidden');
+            playerOverlay.classList.add('flex');
+            document.body.style.overflow = 'hidden';
+
+            document.getElementById('player-custom-title').innerText = title;
+            currentlyPlaying = { 
+                id, type, title, season, ep, 
+                backdrop: currentMediaGlobal?.backdrop_path ? `${IMG_URL}${currentMediaGlobal.backdrop_path}` : 'https://via.placeholder.com/500x281/222/555' 
             };
 
-            customVideo.play().then(() => {
-                playPauseBtn.innerHTML = '<i class="fas fa-pause text-3xl"></i>';
-                resetPlayerIdle();
-            }).catch(e => console.log("Autoplay blocked:", e));
+            // Using secure HTTPS demo video to avoid mixed content block
+            customVideo.src = "https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
+            customVideo.currentTime = startTime;
+            customVideo.play();
+            
+            document.getElementById('player-play-icon').className = 'fas fa-pause';
+            resetIdleTimer();
+            
+            // Throttle saving progress to Firestore every 5 seconds
+            saveInterval = setInterval(saveCurrentProgress, 5000);
         };
 
         window.closePlayer = () => {
+            saveCurrentProgress(); // Final save
+            clearInterval(saveInterval);
             customVideo.pause();
-            customVideo.src = ""; // Stop buffering
-            playerWrapper.classList.add('hidden');
-            playerWrapper.classList.remove('flex');
-            
-            // Exit fullscreen if active
-            if (document.fullscreenElement) {
-                document.exitFullscreen().catch(err => console.log(err));
-            }
-            
+            customVideo.src = ""; // Clear
+            document.getElementById('custom-player-container').classList.add('hidden');
+            document.getElementById('custom-player-container').classList.remove('flex');
             document.body.style.overflow = 'auto';
             currentlyPlaying = null;
-            clearTimeout(playerIdleTimeout);
+            buildContinueWatchingRow(); // Refresh UI
+        };
+
+        // Player Controls
+        window.togglePlay = () => {
+            if (customVideo.paused) { customVideo.play(); document.getElementById('player-play-icon').className = 'fas fa-pause'; } 
+            else { customVideo.pause(); document.getElementById('player-play-icon').className = 'fas fa-play'; }
+            resetIdleTimer();
+        };
+
+        window.skip = (time) => { customVideo.currentTime += time; resetIdleTimer(); };
+        
+        window.toggleMute = () => {
+            customVideo.muted = !customVideo.muted;
+            document.getElementById('player-vol-icon').className = customVideo.muted ? 'fas fa-volume-mute text-red-500' : 'fas fa-volume-up';
+            document.getElementById('player-volume-bar').value = customVideo.muted ? 0 : customVideo.volume;
+            resetIdleTimer();
+        };
+
+        window.toggleFullscreen = () => {
+            if (!document.fullscreenElement) { document.getElementById('custom-player-container').requestFullscreen(); document.getElementById('player-fs-icon').className = 'fas fa-compress'; } 
+            else { document.exitFullscreen(); document.getElementById('player-fs-icon').className = 'fas fa-expand'; }
+            resetIdleTimer();
         };
 
         // Video Event Listeners
-        playPauseBtn.onclick = (e) => {
-            e.stopPropagation();
-            if (customVideo.paused) {
-                customVideo.play();
-                playPauseBtn.innerHTML = '<i class="fas fa-pause text-3xl"></i>';
-                resetPlayerIdle();
-            } else {
-                customVideo.pause();
-                playPauseBtn.innerHTML = '<i class="fas fa-play text-3xl"></i>';
-                playerWrapper.classList.remove('player-idle'); // Keep controls visible when paused
-            }
-        };
-
-        // Click on video to play/pause
-        customVideo.onclick = () => playPauseBtn.click();
+        customVideo.addEventListener('loadedmetadata', () => {
+            seekBar.max = Math.floor(customVideo.duration);
+            document.getElementById('player-time-total').innerText = formatTime(customVideo.duration);
+        });
 
         customVideo.addEventListener('timeupdate', () => {
-            seekBar.value = customVideo.currentTime;
-            timeCurrent.innerText = formatTime(customVideo.currentTime);
-
-            // Throttle saving to Firebase to once every 5 seconds
-            const now = Date.now();
-            if (now - lastSaveTime > 5000 && customVideo.duration > 0) {
-                saveProgressToDB(customVideo.currentTime, customVideo.duration);
-                lastSaveTime = now;
-            }
+            seekBar.value = Math.floor(customVideo.currentTime);
+            document.getElementById('player-time-current').innerText = formatTime(customVideo.currentTime);
+            // Color fill of range slider
+            const percentage = (customVideo.currentTime / customVideo.duration) * 100;
+            seekBar.style.background = `linear-gradient(to right, #E50914 0%, #E50914 ${percentage}%, rgba(255,255,255,0.3) ${percentage}%, rgba(255,255,255,0.3) 100%)`;
         });
 
-        seekBar.addEventListener('input', () => {
-            customVideo.currentTime = seekBar.value;
-        });
+        seekBar.addEventListener('input', () => { customVideo.currentTime = seekBar.value; resetIdleTimer(); });
+        
+        const volBar = document.getElementById('player-volume-bar');
+        volBar.addEventListener('input', () => { customVideo.volume = volBar.value; customVideo.muted = false; document.getElementById('player-vol-icon').className = 'fas fa-volume-up'; });
 
-        rewindBtn.onclick = (e) => { e.stopPropagation(); customVideo.currentTime = Math.max(0, customVideo.currentTime - 10); };
-        forwardBtn.onclick = (e) => { e.stopPropagation(); customVideo.currentTime = Math.min(customVideo.duration, customVideo.currentTime + 10); };
+        function formatTime(seconds) {
+            if(isNaN(seconds)) return "0:00";
+            const m = Math.floor(seconds / 60);
+            const s = Math.floor(seconds % 60);
+            return `${m}:${s < 10 ? '0' : ''}${s}`;
+        }
 
-        muteBtn.onclick = (e) => {
-            e.stopPropagation();
-            customVideo.muted = !customVideo.muted;
-            if (customVideo.muted || customVideo.volume === 0) {
-                muteBtn.innerHTML = '<i class="fas fa-volume-mute text-2xl"></i>';
-                volumeBar.value = 0;
-            } else {
-                muteBtn.innerHTML = '<i class="fas fa-volume-up text-2xl"></i>';
-                volumeBar.value = customVideo.volume;
+        // Idle Mouse logic (Netflix style fade out)
+        function resetIdleTimer() {
+            playerWrapper.classList.remove('fade-out');
+            playerWrapper.classList.add('fade-in');
+            clearTimeout(idleTimeout);
+            if(!customVideo.paused) {
+                idleTimeout = setTimeout(() => {
+                    playerWrapper.classList.remove('fade-in');
+                    playerWrapper.classList.add('fade-out');
+                }, 3000);
             }
-        };
+        }
+        document.getElementById('custom-player-container').addEventListener('mousemove', resetIdleTimer);
+        document.getElementById('custom-player-container').addEventListener('touchstart', resetIdleTimer);
 
-        volumeBar.addEventListener('input', (e) => {
-            e.stopPropagation();
-            customVideo.volume = volumeBar.value;
-            customVideo.muted = false;
-            if (customVideo.volume === 0) muteBtn.innerHTML = '<i class="fas fa-volume-mute text-2xl"></i>';
-            else if (customVideo.volume < 0.5) muteBtn.innerHTML = '<i class="fas fa-volume-down text-2xl"></i>';
-            else muteBtn.innerHTML = '<i class="fas fa-volume-up text-2xl"></i>';
-        });
-
-        fullscreenBtn.onclick = (e) => {
-            e.stopPropagation();
-            if (!document.fullscreenElement) {
-                playerWrapper.requestFullscreen().catch(err => {
-                    alert(`Error attempting to enable fullscreen: ${err.message}`);
-                });
-                fullscreenBtn.innerHTML = '<i class="fas fa-compress text-2xl"></i>';
-            } else {
-                document.exitFullscreen();
-                fullscreenBtn.innerHTML = '<i class="fas fa-expand text-2xl"></i>';
-            }
-        };
-
-        async function saveProgressToDB(progress, duration) {
-            if(!currentlyPlaying || !window.currentUser) return;
-            const docRef = doc(db, 'artifacts', APP_ID, 'users', window.currentUser.uid, 'progress', currentlyPlaying.id.toString());
-            
-            try {
-                await setDoc(docRef, {
+        // Save Progress
+        function saveCurrentProgress() {
+            if(!currentlyPlaying || !customVideo.duration) return;
+            // Only save if watched more than 5 seconds
+            if(customVideo.currentTime > 5) {
+                continueWatching[currentlyPlaying.id] = {
                     id: currentlyPlaying.id,
                     type: currentlyPlaying.type,
                     title: currentlyPlaying.title,
-                    season: currentlyPlaying.season,
-                    episode: currentlyPlaying.episode,
-                    backdrop: currentlyPlaying.backdrop || 'https://via.placeholder.com/500x281/222/555?text=Duoflix',
-                    progress: progress,
-                    duration: duration,
+                    backdrop: currentlyPlaying.backdrop,
+                    progress: customVideo.currentTime,
+                    duration: customVideo.duration,
                     timestamp: Date.now()
-                });
-            } catch(e) { console.error("Error saving progress:", e); }
+                };
+                syncUserData(); // Send to Firebase
+            }
         }
 
     </script>
