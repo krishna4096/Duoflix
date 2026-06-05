@@ -200,6 +200,37 @@
             box-shadow: 0 0 10px rgba(255,255,255,0.3);
         }
         
+        /* Cinematic Netflix Loader */
+        .duoflix-intro {
+            font-family: 'Inter', sans-serif;
+            font-weight: 900;
+            font-size: 3.5rem;
+            color: #E50914;
+            text-transform: uppercase;
+            letter-spacing: 8px;
+            animation: netflix-pop-in 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards, netflix-pulse 2s ease-in-out infinite 1.2s;
+        }
+        @media (min-width: 768px) { .duoflix-intro { font-size: 6rem; letter-spacing: 14px; } }
+
+        @keyframes netflix-pop-in {
+            0% { transform: scale(2.5) translateZ(0); opacity: 0; letter-spacing: -20px; filter: blur(20px); }
+            40% { opacity: 1; filter: blur(5px); }
+            100% { transform: scale(1) translateZ(0); opacity: 1; letter-spacing: 8px; filter: blur(0); text-shadow: 0 0 30px rgba(229, 9, 20, 0.4); }
+        }
+        @media (min-width: 768px) {
+            @keyframes netflix-pop-in {
+                0% { transform: scale(2.5) translateZ(0); opacity: 0; letter-spacing: -30px; filter: blur(20px); }
+                40% { opacity: 1; filter: blur(5px); }
+                100% { transform: scale(1) translateZ(0); opacity: 1; letter-spacing: 14px; filter: blur(0); text-shadow: 0 0 40px rgba(229, 9, 20, 0.4); }
+            }
+        }
+
+        @keyframes netflix-pulse {
+            0% { text-shadow: 0 0 30px rgba(229, 9, 20, 0.4); transform: scale(1); }
+            50% { text-shadow: 0 0 60px rgba(229, 9, 20, 0.8), 0 0 20px rgba(229, 9, 20, 0.5); transform: scale(1.02); }
+            100% { text-shadow: 0 0 30px rgba(229, 9, 20, 0.4); transform: scale(1); }
+        }
+
         /* Custom Player Overlay hide class */
         .player-idle .player-controls { opacity: 0; pointer-events: none; }
         .player-idle { cursor: none; }
@@ -259,9 +290,8 @@
     </div>
 
     <!-- Global Loading Spinner -->
-    <div id="global-loader" class="fixed inset-0 z-[500] bg-[#141414] flex flex-col items-center justify-center">
-        <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-netflix-red mb-4"></div>
-        <p class="text-gray-400 font-medium text-xl tracking-wider">DUOFLIX</p>
+    <div id="global-loader" class="fixed inset-0 z-[1000] bg-[#141414] flex flex-col items-center justify-center">
+        <h1 class="duoflix-intro">Duoflix</h1>
     </div>
 
     <!-- Navigation -->
