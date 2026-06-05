@@ -384,7 +384,7 @@
                         <button id="modal-play-btn" class="bg-white text-black px-8 py-2.5 rounded-md font-bold flex items-center gap-2 hover:bg-gray-200 hover:scale-105 transition-all shadow-lg text-lg">
                             <i class="fas fa-play"></i> Play
                         </button>
-                        <button id="modal-add-btn" class="bg-[#2a2a2a]/80 backdrop-blur border border-gray-500 text-white w-12 h-12 rounded-full flex items-center justify-center hover:border-white hover:bg-[#404040] hover:scale-110 transition-all shadow-lg" onclick="toggleWatchlist(currentMedia)">
+                        <button id="modal-add-btn" class="bg-[#2a2a2a]/80 backdrop-blur border border-gray-500 text-white w-12 h-12 rounded-full flex items-center justify-center hover:border-white hover:bg-[#404040] hover:scale-110 transition-all shadow-lg">
                             <i class="fas fa-plus text-xl" id="modal-add-icon"></i>
                         </button>
                     </div>
@@ -607,7 +607,24 @@
                 }
                 errorMsg.classList.add('hidden');
             } catch (error) {
-                errorMsg.innerText = error.message.replace('Firebase: ', '');
+                let friendlyMsg = "An error occurred. Please try again.";
+                
+                // Human-readable error messages for Firebase Auth
+                if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+                    friendlyMsg = "Invalid email or password. Please try again.";
+                } else if (error.code === 'auth/email-already-in-use') {
+                    friendlyMsg = "An account already exists with this email. Please sign in.";
+                } else if (error.code === 'auth/weak-password') {
+                    friendlyMsg = "Password should be at least 6 characters long.";
+                } else if (error.code === 'auth/invalid-email') {
+                    friendlyMsg = "Please enter a valid email address.";
+                } else if (error.code === 'auth/too-many-requests') {
+                    friendlyMsg = "Too many failed attempts. Please try again later.";
+                } else {
+                    friendlyMsg = error.message.replace('Firebase: ', '');
+                }
+                
+                errorMsg.innerText = friendlyMsg;
                 errorMsg.classList.remove('hidden');
             } finally {
                 btn.disabled = false;
@@ -1021,12 +1038,17 @@
             const icon = document.getElementById('modal-add-icon');
             const btn = document.getElementById('modal-add-btn');
             
+            if(!icon || !btn) return;
+            
+            // Remove both classes first to ensure clean state
+            icon.classList.remove('fa-plus', 'fa-check');
+            
             if (isWatchlisted) {
-                icon.classList.replace('fa-plus', 'fa-check');
+                icon.classList.add('fa-check');
                 btn.classList.remove('bg-[#2a2a2a]/80', 'text-white');
                 btn.classList.add('bg-white', 'text-black');
             } else {
-                icon.classList.replace('fa-check', 'fa-plus');
+                icon.classList.add('fa-plus');
                 btn.classList.remove('bg-white', 'text-black');
                 btn.classList.add('bg-[#2a2a2a]/80', 'text-white');
             }
@@ -1076,6 +1098,7 @@
                 else if (type === 'tv' && details.number_of_seasons) runtimeStr = `${details.number_of_seasons} Season${details.number_of_seasons > 1 ? 's' : ''}`;
                 document.getElementById('modal-runtime').innerText = runtimeStr;
                 
+                // Programmatically attach click handlers
                 document.getElementById('modal-play-btn').onclick = () => {
                     if (type === 'tv') {
                         const select = document.getElementById('season-selector');
@@ -1088,6 +1111,8 @@
                         playMedia(id, 'movie', title, null, null, prog ? prog.progress : 0);
                     }
                 };
+                
+                document.getElementById('modal-add-btn').onclick = () => window.toggleWatchlist(currentMedia);
 
                 const isWatchlisted = watchlist.some(i => i.id === id && i.type === type);
                 updateModalWatchlistUI(isWatchlisted);
