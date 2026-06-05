@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Duoflix - Premium Streaming</title>
     
     <!-- Tailwind CSS -->
@@ -45,8 +45,8 @@
 
         /* Hero Banner Vignette/Gradient */
         .banner-fadeBottom {
-            height: 7.4rem;
-            background-image: linear-gradient(180deg, transparent, rgba(20,20,20,0.61), #141414);
+            height: 12rem;
+            background-image: linear-gradient(180deg, transparent, rgba(20,20,20,0.8), #141414);
             position: absolute;
             bottom: 0;
             width: 100%;
@@ -55,16 +55,25 @@
             background: linear-gradient(to top, #141414 0%, transparent 60%), linear-gradient(to right, #141414 0%, transparent 50%);
         }
 
+        /* Subtle Hero Zoom */
+        .hero-zoom {
+            animation: slowZoom 20s ease-out forwards;
+        }
+        @keyframes slowZoom {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.05); }
+        }
+
         /* Nav Transition */
         .nav-black {
-            background-color: rgba(20, 20, 20, 0.92);
+            background-color: rgba(20, 20, 20, 0.95);
             backdrop-filter: blur(12px);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.6);
             transition: all 0.5s ease;
         }
         .nav-transparent {
             background-color: transparent;
-            background-image: linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, transparent 100%);
+            background-image: linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, transparent 100%);
             transition: all 0.5s ease;
         }
 
@@ -79,7 +88,7 @@
             display: flex;
             overflow-y: hidden;
             overflow-x: scroll;
-            padding: 20px 0 20px 0;
+            padding: 20px 0 30px 0;
             scroll-behavior: smooth;
             -ms-overflow-style: none;
             scrollbar-width: none;
@@ -90,26 +99,26 @@
         .row-poster {
             object-fit: cover;
             width: 100%;
-            border-radius: 4px;
+            border-radius: 6px;
             transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.3s ease;
             cursor: pointer;
             flex: 0 0 calc(100% / 2.2);
             aspect-ratio: 16/9;
-            margin-right: 6px;
+            margin-right: 8px;
             will-change: transform;
             background-color: #222;
             position: relative;
         }
         
-        @media (min-width: 640px) { .row-poster { flex: 0 0 calc(100% / 3.2); margin-right: 8px; } }
+        @media (min-width: 640px) { .row-poster { flex: 0 0 calc(100% / 3.2); margin-right: 10px; } }
         @media (min-width: 768px) { .row-poster { flex: 0 0 calc(100% / 4.2); } }
         @media (min-width: 1024px) { .row-poster { flex: 0 0 calc(100% / 5.2); } }
         @media (min-width: 1280px) { .row-poster { flex: 0 0 calc(100% / 6.2); } }
 
         .row-poster:hover {
-            transform: scale(1.05);
+            transform: scale(1.08);
             z-index: 10;
-            box-shadow: 0px 4px 20px rgba(0,0,0,0.8);
+            box-shadow: 0px 8px 25px rgba(0,0,0,0.9);
         }
 
         /* Netflix-style Text Overlays (Mimics movie logos) */
@@ -118,24 +127,25 @@
             bottom: 0;
             left: 0;
             right: 0;
-            padding: 15px 10px 10px 10px;
-            background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.5) 60%, transparent 100%);
+            padding: 20px 10px 10px 10px;
+            background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.5) 60%, transparent 100%);
             opacity: 1; 
             pointer-events: none;
             display: flex;
             align-items: flex-end;
             justify-content: center;
+            border-bottom-left-radius: 6px;
+            border-bottom-right-radius: 6px;
         }
 
         .poster-title-text {
             color: white;
-            font-size: 1.1rem;
-            font-weight: 900;
+            font-size: 1rem;
+            font-weight: 800;
             text-transform: uppercase;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.9), -1px -1px 0 rgba(0,0,0,0.5);
+            text-shadow: 2px 2px 4px rgba(0,0,0,1), -1px -1px 0 rgba(0,0,0,0.5);
             text-align: center;
             line-height: 1.1;
-            font-family: 'Inter', sans-serif;
             letter-spacing: -0.5px;
             display: -webkit-box;
             -webkit-line-clamp: 2;
@@ -144,10 +154,13 @@
             width: 100%;
         }
 
-        /* Progress Bar */
+        @media (min-width: 768px) { .poster-title-text { font-size: 1.1rem; } }
+
+        /* Progress Bar (Continue Watching) */
         .progress-container {
             width: 100%; height: 4px; background-color: rgba(128,128,128,0.5); position: absolute; bottom: 0; left: 0;
-            border-bottom-left-radius: 4px; border-bottom-right-radius: 4px; overflow: hidden;
+            border-bottom-left-radius: 6px; border-bottom-right-radius: 6px; overflow: hidden;
+            z-index: 20;
         }
         .progress-bar { height: 100%; background-color: #E50914; width: 0%; transition: width 0.3s ease; }
 
@@ -162,11 +175,11 @@
             100% { background-position: -200% 0; }
         }
 
-        .modal-overlay { background-color: rgba(0, 0, 0, 0.8); backdrop-filter: blur(8px); }
+        .modal-overlay { background-color: rgba(0, 0, 0, 0.85); backdrop-filter: blur(10px); }
 
         /* Auth Screen Background */
         .auth-bg {
-            background-image: linear-gradient(to top, rgba(0,0,0,0.8) 0, rgba(0,0,0,0.5) 60%, rgba(0,0,0,0.8) 100%), url('https://assets.nflxext.com/ffe/siteui/vlv3/9d3533b2-0e2b-40b2-95e0-eca797975213/fccfca8d-71b5-4a62-a5e2-66ffbc3f57ce/IN-en-20240311-popsignuptwoweeks-perspective_alpha_website_large.jpg');
+            background-image: linear-gradient(to top, rgba(0,0,0,0.9) 0, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.9) 100%), url('https://assets.nflxext.com/ffe/siteui/vlv3/9d3533b2-0e2b-40b2-95e0-eca797975213/fccfca8d-71b5-4a62-a5e2-66ffbc3f57ce/IN-en-20240311-popsignuptwoweeks-perspective_alpha_website_large.jpg');
             background-size: cover;
             background-position: center;
         }
@@ -216,7 +229,7 @@
 
     <!-- Authentication Screen (Login/Signup) -->
     <div id="auth-screen" class="fixed inset-0 z-[400] auth-bg flex items-center justify-center hidden">
-        <div class="bg-black/80 backdrop-blur-sm p-10 sm:p-16 rounded-xl max-w-md w-full mx-4 shadow-2xl border border-gray-800">
+        <div class="bg-black/85 backdrop-blur-md p-10 sm:p-16 rounded-xl max-w-md w-full mx-4 shadow-[0_0_50px_rgba(0,0,0,0.8)] border border-gray-800">
             <h1 class="text-netflix-red text-4xl font-black tracking-wide uppercase drop-shadow-md mb-8 text-center">Duoflix</h1>
             
             <h2 id="auth-title" class="text-3xl font-bold mb-8 text-white">Sign In</h2>
@@ -248,14 +261,14 @@
     <!-- Global Loading Spinner -->
     <div id="global-loader" class="fixed inset-0 z-[500] bg-[#141414] flex flex-col items-center justify-center">
         <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-netflix-red mb-4"></div>
-        <p class="text-gray-400 font-medium text-xl">Duoflix</p>
+        <p class="text-gray-400 font-medium text-xl tracking-wider">DUOFLIX</p>
     </div>
 
     <!-- API Setup Modal -->
     <div id="api-setup-modal" class="fixed inset-0 z-[200] hidden items-center justify-center modal-overlay">
-        <div class="bg-[#181818]/90 backdrop-blur-xl p-8 rounded-xl max-w-md w-full mx-4 shadow-2xl border border-gray-700">
+        <div class="bg-[#181818]/95 backdrop-blur-xl p-8 rounded-xl max-w-md w-full mx-4 shadow-2xl border border-gray-700">
             <h2 class="text-3xl font-black mb-2 text-white uppercase tracking-wider text-center"><span class="text-netflix-red">Duo</span>flix API</h2>
-            <p class="text-gray-300 mb-6 text-sm text-center">To fetch live movies and TV shows, please enter a valid TMDB v3 API Key. (Stored on your device)</p>
+            <p class="text-gray-300 mb-6 text-sm text-center">To fetch live movies and TV shows, please enter a valid TMDB v3 API Key.</p>
             
             <input type="text" id="api-key-input" placeholder="TMDB API Key (e.g. 1a2b3c...)" class="w-full bg-[#222] border border-gray-600 text-white px-4 py-3 rounded-lg outline-none focus:ring-2 focus:ring-netflix-red mb-2 transition-all">
             
@@ -268,9 +281,9 @@
     <!-- Navigation -->
     <nav id="navbar" class="fixed w-full z-50 nav-transparent flex items-center justify-between px-4 md:px-12 py-4">
         <div class="flex items-center gap-8">
-            <h1 class="text-netflix-red text-2xl md:text-3xl font-black cursor-pointer tracking-wide uppercase drop-shadow-md hover:scale-105 transition-transform" onclick="renderHome()">Duoflix</h1>
+            <h1 class="text-netflix-red text-2xl md:text-3xl font-black cursor-pointer tracking-wide uppercase drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] hover:scale-105 transition-transform" onclick="renderHome()">Duoflix</h1>
             
-            <ul class="hidden md:flex gap-6 text-sm text-gray-200 font-medium">
+            <ul class="hidden md:flex gap-6 text-sm text-gray-200 font-medium drop-shadow-md">
                 <li class="hover:text-white cursor-pointer transition" onclick="renderHome()">Home</li>
                 <li class="hover:text-white cursor-pointer transition" onclick="scrollToSection('tv-shows')">TV Shows</li>
                 <li class="hover:text-white cursor-pointer transition" onclick="scrollToSection('movies')">Movies</li>
@@ -292,21 +305,21 @@
             <!-- Profile -->
             <div class="flex items-center gap-2 cursor-pointer group relative">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png" alt="Profile" id="nav-profile-img" class="w-8 h-8 rounded-md shadow-md border border-transparent group-hover:border-white transition-colors">
-                <i class="fas fa-caret-down text-white text-xs group-hover:rotate-180 transition-transform duration-300 drop-shadow-md"></i>
+                <i class="fas fa-caret-down text-white text-xs group-hover:rotate-180 transition-transform duration-300 drop-shadow-md hidden md:block"></i>
                 
-                <div class="absolute top-10 right-0 bg-black/90 backdrop-blur-lg border border-gray-800 rounded-md w-48 hidden group-hover:block pt-2 pb-2 shadow-2xl">
+                <div class="absolute top-10 right-0 bg-black/95 backdrop-blur-lg border border-gray-800 rounded-md w-56 hidden group-hover:block pt-2 pb-2 shadow-2xl">
                     <div class="px-4 py-3 flex items-center gap-3 border-b border-gray-800 mb-1">
                          <img src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png" id="dropdown-profile-img" class="w-10 h-10 rounded-md border border-gray-600">
                          <div class="overflow-hidden">
                              <p class="text-sm text-white font-bold truncate">Account</p>
-                             <p class="text-xs text-gray-500 truncate" id="user-email-display">user@email.com</p>
+                             <p class="text-xs text-gray-400 truncate" id="user-email-display">user@email.com</p>
                          </div>
                     </div>
                     
-                    <div class="px-4 py-2 hover:bg-gray-800 hover:text-white text-gray-300 text-sm cursor-pointer transition-colors" onclick="openAccountSettings()"><i class="fas fa-pencil-alt mr-2 w-4 text-center"></i> Manage Profiles</div>
-                    <div class="px-4 py-2 hover:bg-gray-800 hover:text-white text-gray-300 text-sm cursor-pointer transition-colors" onclick="showWatchlist()"><i class="fas fa-list mr-2 w-4 text-center"></i> My List</div>
+                    <div class="px-4 py-2.5 hover:bg-gray-800 hover:text-white text-gray-300 text-sm cursor-pointer transition-colors" onclick="openAccountSettings()"><i class="fas fa-pencil-alt mr-3 w-4 text-center"></i> Manage Profiles</div>
+                    <div class="px-4 py-2.5 hover:bg-gray-800 hover:text-white text-gray-300 text-sm cursor-pointer transition-colors" onclick="showWatchlist()"><i class="fas fa-list mr-3 w-4 text-center"></i> My List</div>
                     <div class="mt-1 border-t border-gray-800 pt-1">
-                        <div class="px-4 py-3 hover:bg-netflix-red hover:text-white text-gray-300 text-sm cursor-pointer transition-colors text-center font-medium" onclick="logoutUser()">Sign out of Duoflix</div>
+                        <div class="px-4 py-3 hover:bg-netflix-red hover:text-white text-gray-300 text-sm cursor-pointer transition-colors text-center font-bold" onclick="logoutUser()">Sign out of Duoflix</div>
                     </div>
                 </div>
             </div>
@@ -317,17 +330,17 @@
     <div id="account-settings-modal" class="fixed inset-0 z-[200] hidden items-center justify-center modal-overlay">
         <div class="bg-[#181818]/95 backdrop-blur-xl p-8 rounded-xl max-w-md w-full mx-4 shadow-2xl border border-gray-700 relative">
              <button onclick="closeAccountSettings()" class="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors">
-                <i class="fas fa-times text-xl"></i>
+                <i class="fas fa-times text-2xl"></i>
             </button>
-            <h2 class="text-2xl font-bold mb-6 text-white border-b border-gray-700 pb-2">Edit Profile</h2>
+            <h2 class="text-2xl font-bold mb-6 text-white border-b border-gray-700 pb-3">Edit Profile</h2>
             
             <div class="flex items-start gap-6 mb-8">
-                <div class="relative group cursor-pointer">
+                <div class="relative group cursor-pointer shadow-lg">
                     <img id="settings-current-avatar" src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png" class="w-24 h-24 rounded-md border-2 border-gray-600 group-hover:border-white transition-colors">
                 </div>
-                <div class="flex-grow">
-                    <p class="text-sm text-gray-400 mb-1">Email</p>
-                    <p id="settings-email" class="text-white font-medium mb-4">...</p>
+                <div class="flex-grow pt-2">
+                    <p class="text-xs text-gray-400 mb-1 uppercase font-bold tracking-wider">Email</p>
+                    <p id="settings-email" class="text-white font-medium mb-4 text-lg">...</p>
                 </div>
             </div>
 
@@ -338,7 +351,7 @@
                 </div>
             </div>
 
-            <button onclick="saveAccountSettings()" class="w-full bg-white hover:bg-gray-200 text-black font-bold py-3 rounded-lg transition-transform hover:scale-[1.02]">Save Changes</button>
+            <button onclick="saveAccountSettings()" class="w-full bg-white hover:bg-gray-200 text-black font-bold py-3 rounded-lg transition-transform hover:scale-[1.02] shadow-lg text-lg">Save Changes</button>
         </div>
     </div>
 
@@ -357,11 +370,13 @@
     <!-- Main Content (Home) -->
     <div id="main-view" class="hidden">
         <!-- Hero Banner -->
-        <header id="hero-banner" class="relative h-[85vh] md:h-[90vh] bg-cover bg-center text-white skeleton transition-all duration-1000 ease-out" style="background-image: url('');">
-            <div class="hero-vignette absolute inset-0"></div>
+        <header id="hero-banner" class="relative h-[85vh] md:h-[90vh] overflow-hidden text-white skeleton bg-[#141414]">
+            <div id="hero-bg-image" class="absolute inset-0 bg-cover bg-center transition-all duration-1000 ease-out hero-zoom"></div>
+            <div class="hero-vignette absolute inset-0 z-0"></div>
+            
             <div class="absolute bottom-[20%] left-4 md:left-12 max-w-2xl z-10">
                 <h1 id="hero-title" class="text-5xl md:text-7xl font-black mb-4 drop-shadow-2xl tracking-tight text-white line-clamp-2 leading-tight">...</h1>
-                <p id="hero-overview" class="text-sm md:text-lg text-gray-200 drop-shadow-xl mb-8 line-clamp-3 md:line-clamp-4 max-w-xl font-medium leading-relaxed">Loading content...</p>
+                <p id="hero-overview" class="text-sm md:text-lg text-gray-200 drop-shadow-xl mb-8 line-clamp-3 md:line-clamp-4 max-w-xl font-medium leading-relaxed">Loading cinematic experience...</p>
                 <div class="flex gap-4">
                     <button id="hero-play-btn" class="bg-white text-black px-6 md:px-8 py-2 md:py-3 rounded-md font-bold flex items-center gap-3 hover:bg-gray-200 hover:scale-105 shadow-[0_0_20px_rgba(255,255,255,0.3)] transition-all duration-300 text-lg">
                         <i class="fas fa-play"></i> Play
@@ -371,7 +386,7 @@
                     </button>
                 </div>
             </div>
-            <div class="banner-fadeBottom"></div>
+            <div class="banner-fadeBottom z-0"></div>
         </header>
 
         <div class="pl-4 md:pl-12 pb-20 -mt-24 md:-mt-32 relative z-20 space-y-8 md:space-y-12" id="rows-container">
@@ -444,7 +459,7 @@
         
         <!-- The actual video element -->
         <video id="custom-video" class="w-full h-full object-contain" playsinline preload="metadata">
-            <source src="http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
+            <source src="https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
             Your browser does not support the video tag.
         </video>
 
@@ -456,11 +471,14 @@
                 <button onclick="closePlayer()" class="text-white hover:scale-110 transition-transform mr-6 drop-shadow-md">
                     <i class="fas fa-arrow-left text-4xl"></i>
                 </button>
-                <div id="player-custom-title" class="text-white text-2xl md:text-3xl font-bold drop-shadow-xl tracking-wide"></div>
+                <div id="player-custom-title" class="text-white text-2xl md:text-3xl font-bold drop-shadow-xl tracking-wide truncate pr-4"></div>
             </div>
             
+            <!-- Center Click Area for Play/Pause -->
+            <div class="flex-grow cursor-pointer" onclick="document.getElementById('play-pause-btn').click()"></div>
+            
             <!-- Bottom Controls -->
-            <div class="p-6 md:p-8 bg-gradient-to-t from-black/90 via-black/50 to-transparent pointer-events-auto w-full">
+            <div class="p-6 md:p-8 bg-gradient-to-t from-black/90 via-black/60 to-transparent pointer-events-auto w-full">
                 
                 <!-- Seek Bar -->
                 <div class="flex items-center gap-4 w-full mb-6">
@@ -485,9 +503,9 @@
                     </div>
 
                     <div class="flex items-center gap-6 md:gap-8">
-                        <button class="hover:scale-110 transition-transform flex items-center gap-2 text-gray-300 hover:text-white font-medium">
+                        <button class="hover:scale-110 transition-transform flex items-center gap-2 text-gray-300 hover:text-white font-medium hidden md:flex">
                             <i class="fas fa-step-forward text-2xl"></i>
-                            <span class="hidden md:inline">Next Episode</span>
+                            <span>Next Episode</span>
                         </button>
                         <button id="fullscreen-btn" class="hover:scale-110 transition-transform"><i class="fas fa-expand text-2xl"></i></button>
                     </div>
@@ -497,6 +515,7 @@
         </div>
     </div>
 
+    <!-- Firebase & Core Application Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -521,6 +540,7 @@
         const BASE_URL = 'https://api.themoviedb.org/3';
         const IMG_URL = 'https://image.tmdb.org/t/p/w500';
         const IMG_URL_ORIGINAL = 'https://image.tmdb.org/t/p/original';
+        const FALLBACK_IMG = 'https://via.placeholder.com/500x281/222/555?text=Duoflix';
         
         // Netflix default & 14 unique generated avatars
         const AVATARS = [
@@ -552,6 +572,12 @@
         let authMode = 'login'; 
         let selectedSignupAvatar = AVATARS[0];
         let selectedSettingsAvatar = null;
+
+        // Escape helper for titles with quotes (like Grey's Anatomy)
+        window.escapeStr = (str) => {
+            if(!str) return '';
+            return str.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        };
 
         // Firebase subscriptions
         let unsubWatchlist = null;
@@ -663,7 +689,6 @@
             } catch (error) {
                 let friendlyMsg = "An error occurred. Please try again.";
                 
-                // Human-readable error messages for Firebase Auth
                 if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
                     friendlyMsg = "Invalid email or password. Please try again.";
                 } else if (error.code === 'auth/email-already-in-use') {
@@ -816,7 +841,6 @@
             if(isFetching) return;
             isFetching = true;
             try {
-                // Ensure rows are loaded safely without one failing the others
                 const safeFetch = async (title, endpoint, sectionId) => {
                     try { await fetchAndBuildRow(title, endpoint, sectionId); } 
                     catch(e) { console.error(`Failed row ${title}`); }
@@ -848,7 +872,7 @@
             
             if(!randomMovie) return;
 
-            const hero = document.getElementById('hero-banner');
+            const heroBg = document.getElementById('hero-bg-image');
             const title = document.getElementById('hero-title');
             const overview = document.getElementById('hero-overview');
             const playBtn = document.getElementById('hero-play-btn');
@@ -857,16 +881,23 @@
             const imgUrl = `${IMG_URL_ORIGINAL}${randomMovie.backdrop_path}`;
             const img = new Image();
             img.onload = () => {
-                hero.style.backgroundImage = `url('${imgUrl}')`;
-                hero.classList.remove('skeleton');
+                heroBg.style.backgroundImage = `url('${imgUrl}')`;
+                document.getElementById('hero-banner').classList.remove('skeleton');
             };
             img.src = imgUrl;
             
-            title.innerText = randomMovie.name || randomMovie.title || randomMovie.original_name;
+            const titleText = randomMovie.name || randomMovie.title || randomMovie.original_name;
+            title.innerText = titleText;
             overview.innerText = truncate(randomMovie.overview, 180);
 
             const type = randomMovie.media_type || 'movie';
-            playBtn.onclick = () => window.playMedia(randomMovie.id, type, title.innerText);
+            
+            playBtn.onclick = () => window.playMedia({
+                id: randomMovie.id, 
+                type: type, 
+                title: titleText, 
+                backdrop: imgUrl
+            });
             infoBtn.onclick = () => window.openDetailsModal(randomMovie.id, type);
         }
 
@@ -904,8 +935,8 @@
                 const titleText = movie.name || movie.title || '';
                 
                 return `
-                <div class="row-poster group relative overflow-hidden" onclick="openDetailsModal(${movie.id}, '${type}')">
-                    <img src="${IMG_URL}${imgPath}" alt="${titleText}" class="w-full h-full object-cover rounded-md" loading="lazy">
+                <div class="row-poster group relative overflow-hidden shadow-lg" onclick="openDetailsModal(${movie.id}, '${type}')">
+                    <img src="${IMG_URL}${imgPath}" alt="${window.escapeStr(titleText)}" class="w-full h-full object-cover rounded-md" loading="lazy">
                     <div class="poster-title-overlay">
                         <p class="poster-title-text">${titleText}</p>
                     </div>
@@ -934,18 +965,18 @@
                         
                         <div id="${rowId}" class="row-posters pl-4 md:pl-0">
                             ${items.map(item => `
-                                <div class="row-poster group" onclick="openDetailsModal(${item.id}, '${item.type}')">
-                                    <img src="${item.backdrop}" class="w-full h-full object-cover rounded-md opacity-80 group-hover:opacity-100 transition-opacity duration-300" loading="lazy">
-                                    <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/20">
-                                        <div class="bg-black/60 backdrop-blur-sm rounded-full w-12 h-12 flex items-center justify-center border border-white/50 shadow-xl hover:scale-110 transition-transform">
-                                            <i class="fas fa-play text-white ml-1 text-lg"></i>
+                                <div class="row-poster group relative overflow-hidden" onclick="window.playMedia({id: ${item.id}, type: '${item.type}', title: '${window.escapeStr(item.title)}', backdrop: '${item.backdrop}', season: ${item.season || 'null'}, episode: ${item.episode || 'null'}, startTime: ${item.progress}})">
+                                    <img src="${item.backdrop && item.backdrop !== 'null' ? item.backdrop : FALLBACK_IMG}" class="w-full h-full object-cover rounded-md opacity-80 group-hover:opacity-100 transition-opacity duration-300" loading="lazy">
+                                    <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/40 backdrop-blur-[1px] z-10">
+                                        <div class="bg-black/60 rounded-full w-14 h-14 flex items-center justify-center border-2 border-white shadow-xl hover:scale-110 transition-transform">
+                                            <i class="fas fa-play text-white ml-1 text-xl"></i>
                                         </div>
                                     </div>
-                                    <div class="poster-title-overlay">
+                                    <div class="poster-title-overlay pb-3">
                                         <p class="poster-title-text">${item.title}</p>
                                     </div>
-                                    <div class="progress-container"><div class="progress-bar shadow-[0_0_10px_#E50914]" style="width: ${(item.progress / item.duration) * 100}%"></div></div>
-                                    ${item.type === 'tv' ? `<span class="absolute top-2 right-2 bg-black/80 backdrop-blur-md px-1.5 py-0.5 text-[10px] md:text-xs rounded font-bold shadow-md border border-gray-700 text-white z-10">S${item.season} E${item.episode}</span>` : ''}
+                                    <div class="progress-container"><div class="progress-bar shadow-[0_0_10px_#E50914]" style="width: ${(item.progress / (item.duration || 1)) * 100}%"></div></div>
+                                    ${item.type === 'tv' && item.season && item.episode ? `<span class="absolute top-2 right-2 bg-black/80 backdrop-blur-md px-2 py-1 text-xs rounded font-bold shadow-md border border-gray-700 text-white z-10">S${item.season} E${item.episode}</span>` : ''}
                                 </div>
                             `).join('')}
                         </div>
@@ -1044,7 +1075,7 @@
             
             const grid = document.getElementById('watchlist-grid');
             if (watchlist.length === 0) {
-                grid.innerHTML = '<div class="col-span-full flex flex-col items-center justify-center py-32"><i class="fas fa-bookmark text-7xl text-gray-800 mb-6 drop-shadow-md"></i><p class="text-gray-400 text-2xl font-medium">Your watchlist is empty.</p><button onclick="renderHome()" class="mt-8 bg-white text-black px-6 py-2 rounded font-bold hover:bg-gray-200 transition">Explore Titles</button></div>';
+                grid.innerHTML = '<div class="col-span-full flex flex-col items-center justify-center py-32"><i class="fas fa-bookmark text-7xl text-gray-800 mb-6 drop-shadow-md"></i><p class="text-gray-400 text-2xl font-medium">Your watchlist is empty.</p><button onclick="renderHome()" class="mt-8 bg-white text-black px-6 py-2 rounded font-bold hover:bg-gray-200 transition shadow-lg">Explore Titles</button></div>';
                 return;
             }
 
@@ -1077,7 +1108,7 @@
                         id: media.id,
                         type: media.type,
                         title: media.title || media.name,
-                        poster: `${IMG_URL}${media.backdrop_path || media.poster_path}`,
+                        poster: media.backdrop_path ? `${IMG_URL}${media.backdrop_path}` : FALLBACK_IMG,
                         timestamp: Date.now()
                     };
                     await setDoc(docRef, newItem);
@@ -1128,15 +1159,15 @@
                 ]);
 
                 currentMedia = { ...details, type };
+                const backdropUrl = details.backdrop_path ? `${IMG_URL_ORIGINAL}${details.backdrop_path}` : FALLBACK_IMG;
 
                 if (details.backdrop_path) {
-                    const bgUrl = `${IMG_URL_ORIGINAL}${details.backdrop_path}`;
                     const img = new Image();
                     img.onload = () => {
-                        document.getElementById('modal-backdrop').style.backgroundImage = `url('${bgUrl}')`;
+                        document.getElementById('modal-backdrop').style.backgroundImage = `url('${backdropUrl}')`;
                         document.getElementById('modal-backdrop').classList.remove('skeleton');
                     };
-                    img.src = bgUrl;
+                    img.src = backdropUrl;
                 } else {
                      document.getElementById('modal-backdrop').classList.remove('skeleton');
                      document.getElementById('modal-backdrop').style.backgroundColor = '#222';
@@ -1152,17 +1183,19 @@
                 else if (type === 'tv' && details.number_of_seasons) runtimeStr = `${details.number_of_seasons} Season${details.number_of_seasons > 1 ? 's' : ''}`;
                 document.getElementById('modal-runtime').innerText = runtimeStr;
                 
-                // Programmatically attach click handlers
+                // Programmatically attach click handlers via Object args for safety
                 document.getElementById('modal-play-btn').onclick = () => {
+                    const prog = continueWatching[id];
                     if (type === 'tv') {
                         const select = document.getElementById('season-selector');
                         const season = select ? select.value : 1;
-                        const prog = continueWatching[id];
-                        if (prog && prog.season && prog.episode) playMedia(id, 'tv', title, prog.season, prog.episode, prog.progress);
-                        else playMedia(id, 'tv', title, season, 1);
+                        if (prog && prog.season && prog.episode) {
+                            window.playMedia({id, type: 'tv', title, backdrop: backdropUrl, season: prog.season, episode: prog.episode, startTime: prog.progress});
+                        } else {
+                            window.playMedia({id, type: 'tv', title, backdrop: backdropUrl, season: season, episode: 1});
+                        }
                     } else {
-                        const prog = continueWatching[id];
-                        playMedia(id, 'movie', title, null, null, prog ? prog.progress : 0);
+                        window.playMedia({id, type: 'movie', title, backdrop: backdropUrl, startTime: prog ? prog.progress : 0});
                     }
                 };
                 
@@ -1206,18 +1239,19 @@
             try {
                 const data = await fetchTMDB(`/tv/${currentMedia.id}/season/${seasonNumber}`);
                 const prog = continueWatching[currentMedia.id];
+                const bgUrl = currentMedia.backdrop_path ? `${IMG_URL_ORIGINAL}${currentMedia.backdrop_path}` : FALLBACK_IMG;
                 
                 container.innerHTML = data.episodes.map(ep => {
                     const isLastWatched = prog && prog.season == seasonNumber && prog.episode == ep.episode_number;
                     const progressPercent = isLastWatched && prog.duration ? (prog.progress / prog.duration) * 100 : 0;
                     
                     return `
-                    <div class="flex items-center p-4 border-b border-gray-800 cursor-pointer rounded-lg hover:bg-[#333] transition-colors group/ep" onclick="playMedia(${currentMedia.id}, 'tv', '${currentMedia.name.replace(/'/g, "\\'")}', ${seasonNumber}, ${ep.episode_number})">
+                    <div class="flex items-center p-4 border-b border-gray-800 cursor-pointer rounded-lg hover:bg-[#333] transition-colors group/ep" onclick="window.playMedia({id: ${currentMedia.id}, type: 'tv', title: '${window.escapeStr(currentMedia.name)}', backdrop: '${bgUrl}', season: ${seasonNumber}, episode: ${ep.episode_number}})">
                         <div class="text-2xl font-bold text-gray-600 w-12 text-center group-hover/ep:text-white">${ep.episode_number}</div>
                         <div class="relative w-36 aspect-video bg-[#111] flex-shrink-0 rounded-md overflow-hidden border border-gray-700">
                             ${ep.still_path ? `<img src="${IMG_URL}${ep.still_path}" class="w-full h-full object-cover">` : ''}
-                            <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/ep:opacity-100 transition-opacity"><i class="fas fa-play text-white text-xl"></i></div>
-                            ${isLastWatched ? `<div class="progress-container"><div class="progress-bar" style="width: ${progressPercent}%"></div></div>` : ''}
+                            <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/ep:opacity-100 transition-opacity"><i class="fas fa-play text-white text-xl shadow-[0_0_10px_black] border-2 border-white rounded-full p-2 bg-black/50"></i></div>
+                            ${isLastWatched ? `<div class="progress-container"><div class="progress-bar shadow-[0_0_10px_#E50914]" style="width: ${progressPercent}%"></div></div>` : ''}
                         </div>
                         <div class="ml-5 flex-grow pr-2">
                             <div class="flex justify-between items-center mb-1"><h4 class="font-bold text-white text-base truncate">${ep.name}</h4><span class="text-xs text-gray-400">${ep.runtime || '--'}m</span></div>
@@ -1225,7 +1259,7 @@
                         </div>
                     </div>
                 `}).join('');
-            } catch (e) { container.innerHTML = '<p class="text-red-500 p-4">Failed to load.</p>'; }
+            } catch (e) { container.innerHTML = '<p class="text-red-500 p-4">Failed to load episodes.</p>'; }
         };
 
         window.closeModal = () => {
@@ -1274,13 +1308,17 @@
             return `${min}:${sec < 10 ? '0' : ''}${sec}`;
         }
 
-        window.playMedia = (id, type, title, season = null, episode = null, startTime = 0) => {
+        // Updated safe play function accepting an Object
+        window.playMedia = ({ id, type, title, backdrop, season = null, episode = null, startTime = 0 }) => {
             window.closeModal();
             playerWrapper.classList.remove('hidden');
             playerWrapper.classList.add('flex');
             document.body.style.overflow = 'hidden';
             
-            currentlyPlaying = { id, type, title, season, episode, backdrop: currentMedia?.backdrop_path ? `${IMG_URL}${currentMedia.backdrop_path}` : null };
+            currentlyPlaying = { 
+                id, type, title, season, episode, 
+                backdrop: backdrop || FALLBACK_IMG
+            };
             
             if (type === 'movie') {
                 document.getElementById('player-custom-title').innerText = title;
@@ -1288,11 +1326,9 @@
                 document.getElementById('player-custom-title').innerText = `${title} - S${season} E${episode}`;
             }
 
-            // Setting the demo video source
-            customVideo.src = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
+            customVideo.src = "https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
             customVideo.currentTime = startTime;
             
-            // Wait for metadata to load total time
             customVideo.onloadedmetadata = () => {
                 timeTotal.innerText = formatTime(customVideo.duration);
                 seekBar.max = customVideo.duration;
@@ -1306,11 +1342,10 @@
 
         window.closePlayer = () => {
             customVideo.pause();
-            customVideo.src = ""; // Stop buffering
+            customVideo.src = ""; 
             playerWrapper.classList.add('hidden');
             playerWrapper.classList.remove('flex');
             
-            // Exit fullscreen if active
             if (document.fullscreenElement) {
                 document.exitFullscreen().catch(err => console.log(err));
             }
@@ -1320,7 +1355,6 @@
             clearTimeout(playerIdleTimeout);
         };
 
-        // Video Event Listeners
         playPauseBtn.onclick = (e) => {
             e.stopPropagation();
             if (customVideo.paused) {
@@ -1330,18 +1364,14 @@
             } else {
                 customVideo.pause();
                 playPauseBtn.innerHTML = '<i class="fas fa-play text-3xl"></i>';
-                playerWrapper.classList.remove('player-idle'); // Keep controls visible when paused
+                playerWrapper.classList.remove('player-idle'); 
             }
         };
-
-        // Click on video to play/pause
-        customVideo.onclick = () => playPauseBtn.click();
 
         customVideo.addEventListener('timeupdate', () => {
             seekBar.value = customVideo.currentTime;
             timeCurrent.innerText = formatTime(customVideo.currentTime);
 
-            // Throttle saving to Firebase to once every 5 seconds
             const now = Date.now();
             if (now - lastSaveTime > 5000 && customVideo.duration > 0) {
                 saveProgressToDB(customVideo.currentTime, customVideo.duration);
@@ -1381,7 +1411,7 @@
             e.stopPropagation();
             if (!document.fullscreenElement) {
                 playerWrapper.requestFullscreen().catch(err => {
-                    alert(`Error attempting to enable fullscreen: ${err.message}`);
+                    console.log(`Fullscreen error: ${err.message}`);
                 });
                 fullscreenBtn.innerHTML = '<i class="fas fa-compress text-2xl"></i>';
             } else {
@@ -1401,7 +1431,7 @@
                     title: currentlyPlaying.title,
                     season: currentlyPlaying.season,
                     episode: currentlyPlaying.episode,
-                    backdrop: currentlyPlaying.backdrop || 'https://via.placeholder.com/500x281/222/555?text=Duoflix',
+                    backdrop: currentlyPlaying.backdrop || FALLBACK_IMG,
                     progress: progress,
                     duration: duration,
                     timestamp: Date.now()
