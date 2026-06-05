@@ -297,7 +297,7 @@
                     <div class="px-4 py-3 flex items-center gap-3 border-b border-gray-800 mb-1">
                          <img src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png" id="dropdown-profile-img" class="w-10 h-10 rounded-md border border-gray-600">
                          <div class="overflow-hidden">
-                             <p class="text-sm text-white font-bold truncate">Account</p>
+                             <p class="text-sm text-white font-bold truncate" id="dropdown-user-name">Account</p>
                              <p class="text-xs text-gray-400 truncate" id="user-email-display">user@email.com</p>
                          </div>
                     </div>
@@ -325,8 +325,14 @@
                     <img id="settings-current-avatar" src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png" class="w-24 h-24 rounded-md border-2 border-gray-600 group-hover:border-white transition-colors">
                 </div>
                 <div class="flex-grow pt-2">
-                    <p class="text-xs text-gray-400 mb-1 uppercase font-bold tracking-wider">Email</p>
-                    <p id="settings-email" class="text-white font-medium mb-4 text-lg">...</p>
+                    <div class="mb-3">
+                        <p class="text-xs text-gray-400 mb-1 uppercase font-bold tracking-wider">Profile Name</p>
+                        <input type="text" id="settings-name" placeholder="Enter your name" class="w-full bg-[#333] border border-gray-600 text-white px-3 py-2 rounded outline-none focus:border-netflix-red transition-colors text-sm font-medium">
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-400 mb-1 uppercase font-bold tracking-wider">Email</p>
+                        <p id="settings-email" class="text-gray-300 font-medium text-sm">...</p>
+                    </div>
                 </div>
             </div>
 
@@ -337,7 +343,7 @@
                 </div>
             </div>
 
-            <button onclick="saveAccountSettings()" class="w-full bg-white hover:bg-gray-200 text-black font-bold py-3 rounded-lg transition-transform hover:scale-[1.02] shadow-lg text-lg">Save Changes</button>
+            <button id="save-settings-btn" onclick="saveAccountSettings()" class="w-full bg-white hover:bg-gray-200 text-black font-bold py-3 rounded-lg transition-transform hover:scale-[1.02] shadow-lg text-lg">Save Changes</button>
         </div>
     </div>
 
@@ -506,7 +512,7 @@
         ];
 
         window.currentUser = null;
-        let currentUserData = { avatar: AVATARS[0] }; 
+        let currentUserData = { avatar: AVATARS[0], name: 'Netflix User' }; 
         let watchlist = [];
         let continueWatching = {}; 
         let currentMedia = null; 
@@ -620,6 +626,7 @@
                     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                     await setDoc(doc(db, 'artifacts', APP_ID, 'users', userCredential.user.uid, 'profile', 'info'), {
                         avatar: selectedSignupAvatar,
+                        name: email.split('@')[0],
                         createdAt: Date.now()
                     });
                 }
@@ -660,6 +667,7 @@
             modal.classList.add('flex');
             selectedSettingsAvatar = currentUserData.avatar;
             document.getElementById('settings-current-avatar').src = selectedSettingsAvatar;
+            document.getElementById('settings-name').value = currentUserData.name || '';
             renderAvatarOptions('settings-avatar-list', selectedSettingsAvatar, 'selectSettingsAvatar');
         };
 
@@ -671,14 +679,26 @@
 
         window.saveAccountSettings = async () => {
              if (!window.currentUser) return;
+             
+             const btn = document.getElementById('save-settings-btn');
+             const originalText = btn.innerText;
+             btn.innerText = "Saving...";
+             btn.disabled = true;
+             
+             const newName = document.getElementById('settings-name').value.trim();
+             
              try {
                  await setDoc(doc(db, 'artifacts', APP_ID, 'users', window.currentUser.uid, 'profile', 'info'), {
                      avatar: selectedSettingsAvatar,
+                     name: newName || 'User',
                      updatedAt: Date.now()
                  }, { merge: true });
                  window.closeAccountSettings();
              } catch(e) {
                  console.error("Error saving profile", e);
+             } finally {
+                 btn.innerText = originalText;
+                 btn.disabled = false;
              }
         };
 
@@ -691,13 +711,19 @@
             // Profile Listener
             const profileRef = doc(db, 'artifacts', APP_ID, 'users', uid, 'profile', 'info');
             unsubUser = onSnapshot(profileRef, (doc) => {
-                if (doc.exists() && doc.data().avatar) {
-                    currentUserData.avatar = doc.data().avatar;
+                if (doc.exists()) {
+                    currentUserData.avatar = doc.data().avatar || AVATARS[0];
+                    currentUserData.name = doc.data().name || 'Netflix User';
                 } else {
                     currentUserData.avatar = AVATARS[0]; 
+                    currentUserData.name = 'Netflix User';
                 }
                 document.getElementById('nav-profile-img').src = currentUserData.avatar;
                 document.getElementById('dropdown-profile-img').src = currentUserData.avatar;
+                
+                const dropdownName = document.getElementById('dropdown-user-name');
+                if(dropdownName) dropdownName.innerText = currentUserData.name;
+                
             }, (error) => console.error("Profile sync error:", error));
 
             // Watchlist Listener
@@ -1209,8 +1235,14 @@
 
             iframeContainer.innerHTML = `<iframe src="${url}" class="w-full h-full border-0" allowfullscreen allow="autoplay; fullscreen"></iframe>`;
             
-            // Background Progress Tracker (Saves every 5 seconds)
-            let mockProgress = startTime;
+            // Background Progress Tracker
+            let mockProgress = startTime || 0;
+            
+            // Instant save to force row to appear immediately
+            setTimeout(() => {
+                saveProgressToDB(mockProgress > 0 ? mockProgress : 1, 7200);
+            }, 1000);
+            
             progressInterval = setInterval(() => {
                 mockProgress += 5; 
                 saveProgressToDB(mockProgress, 7200); // 7200s (2 hours) average duration mock
