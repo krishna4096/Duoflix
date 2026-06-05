@@ -264,20 +264,6 @@
         <p class="text-gray-400 font-medium text-xl tracking-wider">DUOFLIX</p>
     </div>
 
-    <!-- API Setup Modal -->
-    <div id="api-setup-modal" class="fixed inset-0 z-[200] hidden items-center justify-center modal-overlay">
-        <div class="bg-[#181818]/95 backdrop-blur-xl p-8 rounded-xl max-w-md w-full mx-4 shadow-2xl border border-gray-700">
-            <h2 class="text-3xl font-black mb-2 text-white uppercase tracking-wider text-center"><span class="text-netflix-red">Duo</span>flix API</h2>
-            <p class="text-gray-300 mb-6 text-sm text-center">To fetch live movies and TV shows, please enter a valid TMDB v3 API Key.</p>
-            
-            <input type="text" id="api-key-input" placeholder="TMDB API Key (e.g. 1a2b3c...)" class="w-full bg-[#222] border border-gray-600 text-white px-4 py-3 rounded-lg outline-none focus:ring-2 focus:ring-netflix-red mb-2 transition-all">
-            
-            <p id="api-error-msg" class="text-red-500 text-xs mb-4 hidden font-medium text-center"></p>
-            <p class="text-xs text-gray-400 mb-6 text-center">Get it free from <a href="https://www.themoviedb.org/settings/api" target="_blank" class="text-netflix-red hover:underline font-semibold">TMDB</a></p>
-            <button onclick="saveApiKey()" class="w-full bg-netflix-red hover:bg-red-700 text-white font-bold py-3 rounded-lg transition-transform hover:scale-[1.02]">Start Watching</button>
-        </div>
-    </div>
-
     <!-- Navigation -->
     <nav id="navbar" class="fixed w-full z-50 nav-transparent flex items-center justify-between px-4 md:px-12 py-4">
         <div class="flex items-center gap-8">
@@ -542,6 +528,11 @@
         const IMG_URL_ORIGINAL = 'https://image.tmdb.org/t/p/original';
         const FALLBACK_IMG = 'https://via.placeholder.com/500x281/222/555?text=Duoflix';
         
+        // --- API KEY OBFUSCATION ---
+        // Hidden API Key logic using array splits and Base64 so it's not plain text.
+        const _k = ['OTg1MWNi', 'NDI2YmZi', 'ZDlkMWFk', 'MjFiZTUy', 'YTJkNmE4', 'Y2M='];
+        const API_KEY = atob(_k.join(''));
+        
         // Netflix default & 14 unique generated avatars
         const AVATARS = [
             'https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png',
@@ -563,7 +554,6 @@
 
         window.currentUser = null;
         let currentUserData = { avatar: AVATARS[0] }; 
-        let API_KEY = localStorage.getItem('tmdb_api_key');
         let watchlist = [];
         let continueWatching = {}; 
         let currentMedia = null; 
@@ -629,20 +619,15 @@
                 
                 subscribeToUserData();
 
-                if (!API_KEY) {
-                    const modal = document.getElementById('api-setup-modal');
-                    modal.classList.remove('hidden');
-                    modal.classList.add('flex');
-                } else {
-                    document.getElementById('main-view').classList.remove('hidden');
-                    window.initApp();
-                }
+                // Directly initialize app since API key is hardcoded now
+                document.getElementById('main-view').classList.remove('hidden');
+                window.initApp();
+
             } else {
                 window.currentUser = null;
                 cleanupData();
                 document.getElementById('auth-screen').classList.remove('hidden');
                 document.getElementById('main-view').classList.add('hidden');
-                document.getElementById('api-setup-modal').classList.add('hidden');
                 document.getElementById('watchlist-view').classList.add('hidden');
                 document.getElementById('search-results-view').classList.add('hidden');
                 renderAvatarOptions('avatar-list', selectedSignupAvatar, 'selectSignupAvatar');
@@ -796,38 +781,7 @@
             document.getElementById('rows-container').innerHTML = '';
         }
 
-        // --- API KEY & TMDB ---
-
-        window.saveApiKey = async () => {
-            const keyInput = document.getElementById('api-key-input');
-            const errorMsg = document.getElementById('api-error-msg');
-            const key = keyInput.value.trim();
-            
-            if (key.length > 15) {
-                errorMsg.classList.add('hidden');
-                keyInput.disabled = true;
-                try {
-                    const res = await fetch(`${BASE_URL}/configuration?api_key=${key}`);
-                    if(!res.ok) throw new Error("Invalid API Key");
-                    
-                    API_KEY = key;
-                    localStorage.setItem('tmdb_api_key', key);
-                    
-                    const modal = document.getElementById('api-setup-modal');
-                    modal.classList.add('hidden');
-                    modal.classList.remove('flex');
-                    document.getElementById('main-view').classList.remove('hidden');
-                    window.initApp();
-                } catch(e) {
-                    keyInput.disabled = false;
-                    errorMsg.innerText = "Invalid API Key. Please check and try again.";
-                    errorMsg.classList.remove('hidden');
-                }
-            } else {
-                errorMsg.innerText = "Please enter a valid API key string.";
-                errorMsg.classList.remove('hidden');
-            }
-        };
+        // --- API INTEGRATION ---
 
         async function fetchTMDB(endpoint) {
             const separator = endpoint.includes('?') ? '&' : '?';
