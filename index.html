@@ -4,1323 +4,986 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Duoflix - Premium Streaming</title>
-    
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
-
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    },
-                    colors: {
-                        netflix: {
-                            red: '#E50914',
-                            dark: '#141414',
-                            gray: '#808080',
-                            light: '#E5E5E5',
-                        }
-                    }
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: { netflix: { red: '#E50914', dark: '#141414' } }
                 }
             }
         }
     </script>
-
     <style>
-        body {
-            background-color: #141414;
-            color: #ffffff;
-            overflow-x: hidden;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        /* Hero Banner Vignette/Gradient */
-        .banner-fadeBottom {
-            height: 12rem;
-            background-image: linear-gradient(180deg, transparent, rgba(20,20,20,0.8), #141414);
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-        }
-        .hero-vignette {
-            background: linear-gradient(to top, #141414 0%, transparent 60%), linear-gradient(to right, #141414 0%, transparent 50%);
-        }
-
-        /* Subtle Hero Zoom */
-        .hero-zoom {
-            animation: slowZoom 20s ease-out forwards;
-        }
-        @keyframes slowZoom {
-            0% { transform: scale(1); }
-            100% { transform: scale(1.05); }
-        }
-
-        /* Nav Transition */
-        .nav-black {
-            background-color: rgba(20, 20, 20, 0.95);
-            backdrop-filter: blur(12px);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.6);
-            transition: all 0.5s ease;
-        }
-        .nav-transparent {
-            background-color: transparent;
-            background-image: linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, transparent 100%);
-            transition: all 0.5s ease;
-        }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: #141414; }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #555; }
-
-        /* Row Scrolling */
-        .row-posters {
-            display: flex;
-            overflow-y: hidden;
-            overflow-x: scroll;
-            padding: 20px 0 30px 0;
-            scroll-behavior: smooth;
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-        .row-posters::-webkit-scrollbar { display: none; }
-
-        /* Movie Posters (Wide 16:9 like Netflix) */
-        .row-poster {
-            object-fit: cover;
-            width: 100%;
-            border-radius: 6px;
-            transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.3s ease;
-            cursor: pointer;
-            flex: 0 0 calc(100% / 2.2);
-            aspect-ratio: 16/9;
-            margin-right: 8px;
-            will-change: transform;
-            background-color: #222;
-            position: relative;
-        }
-        
-        @media (min-width: 640px) { .row-poster { flex: 0 0 calc(100% / 3.2); margin-right: 10px; } }
-        @media (min-width: 768px) { .row-poster { flex: 0 0 calc(100% / 4.2); } }
-        @media (min-width: 1024px) { .row-poster { flex: 0 0 calc(100% / 5.2); } }
-        @media (min-width: 1280px) { .row-poster { flex: 0 0 calc(100% / 6.2); } }
-
-        .row-poster:hover {
-            transform: scale(1.08);
-            z-index: 10;
-            box-shadow: 0px 8px 25px rgba(0,0,0,0.9);
-        }
-
-        /* Netflix-style Text Overlays (Mimics movie logos) */
-        .poster-title-overlay {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            padding: 20px 10px 10px 10px;
-            background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.5) 60%, transparent 100%);
-            opacity: 1; 
-            pointer-events: none;
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
-            border-bottom-left-radius: 6px;
-            border-bottom-right-radius: 6px;
-        }
-
-        .poster-title-text {
-            color: white;
-            font-size: 1rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            text-shadow: 2px 2px 4px rgba(0,0,0,1), -1px -1px 0 rgba(0,0,0,0.5);
-            text-align: center;
-            line-height: 1.1;
-            letter-spacing: -0.5px;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-            width: 100%;
-        }
-
-        @media (min-width: 768px) { .poster-title-text { font-size: 1.1rem; } }
-
-        /* Progress Bar (Continue Watching) */
-        .progress-container {
-            width: 100%; height: 4px; background-color: rgba(128,128,128,0.5); position: absolute; bottom: 0; left: 0;
-            border-bottom-left-radius: 6px; border-bottom-right-radius: 6px; overflow: hidden;
-            z-index: 20;
-        }
-        .progress-bar { height: 100%; background-color: #E50914; width: 0%; transition: width 0.3s ease; }
-
-        /* Loading Skeletons */
-        .skeleton {
-            background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
-            background-size: 200% 100%;
-            animation: skeleton-loading 1.5s infinite;
-        }
-        @keyframes skeleton-loading {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
-
-        .modal-overlay { background-color: rgba(0, 0, 0, 0.85); backdrop-filter: blur(10px); }
-
-        /* Auth Screen Background */
-        .auth-bg {
-            background-image: linear-gradient(to top, rgba(0,0,0,0.9) 0, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.9) 100%), url('https://assets.nflxext.com/ffe/siteui/vlv3/9d3533b2-0e2b-40b2-95e0-eca797975213/fccfca8d-71b5-4a62-a5e2-66ffbc3f57ce/IN-en-20240311-popsignuptwoweeks-perspective_alpha_website_large.jpg');
-            background-size: cover;
-            background-position: center;
-        }
-
-        /* Avatar Selection Styling */
-        .avatar-option {
-            width: 48px;
-            height: 48px;
-            border-radius: 4px;
-            cursor: pointer;
-            border: 2px solid transparent;
-            transition: all 0.2s ease;
-        }
-        .avatar-option:hover { transform: scale(1.1); }
-        .avatar-option.selected {
-            border-color: white;
-            transform: scale(1.1);
-            box-shadow: 0 0 10px rgba(255,255,255,0.3);
-        }
-        
-        /* Cinematic Netflix Loader */
-        .duoflix-intro {
-            font-family: 'Inter', sans-serif;
-            font-weight: 900;
-            font-size: 3.5rem;
-            color: #E50914;
-            text-transform: uppercase;
-            letter-spacing: 8px;
-            animation: netflix-pop-in 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards, netflix-pulse 2s ease-in-out infinite 1.2s;
-        }
-        @media (min-width: 768px) { .duoflix-intro { font-size: 6rem; letter-spacing: 14px; } }
-
-        @keyframes netflix-pop-in {
-            0% { transform: scale(2.5) translateZ(0); opacity: 0; letter-spacing: -20px; filter: blur(20px); }
-            40% { opacity: 1; filter: blur(5px); }
-            100% { transform: scale(1) translateZ(0); opacity: 1; letter-spacing: 8px; filter: blur(0); text-shadow: 0 0 30px rgba(229, 9, 20, 0.4); }
-        }
-        @media (min-width: 768px) {
-            @keyframes netflix-pop-in {
-                0% { transform: scale(2.5) translateZ(0); opacity: 0; letter-spacing: -30px; filter: blur(20px); }
-                40% { opacity: 1; filter: blur(5px); }
-                100% { transform: scale(1) translateZ(0); opacity: 1; letter-spacing: 14px; filter: blur(0); text-shadow: 0 0 40px rgba(229, 9, 20, 0.4); }
-            }
-        }
-
-        @keyframes netflix-pulse {
-            0% { text-shadow: 0 0 30px rgba(229, 9, 20, 0.4); transform: scale(1); }
-            50% { text-shadow: 0 0 60px rgba(229, 9, 20, 0.8), 0 0 20px rgba(229, 9, 20, 0.5); transform: scale(1.02); }
-            100% { text-shadow: 0 0 30px rgba(229, 9, 20, 0.4); transform: scale(1); }
-        }
-
-        /* Custom Player Overlay hide class */
-        .player-idle .player-controls { opacity: 0; pointer-events: none; }
-        .player-idle { cursor: none; }
-
-        /* Custom Video Player Range Sliders */
-        input[type=range] {
-            accent-color: #E50914;
-            height: 4px;
-            cursor: pointer;
-        }
-        input[type=range]::-webkit-slider-thumb {
-            appearance: none;
-            width: 16px;
-            height: 16px;
-            background: #E50914;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: transform 0.1s;
-        }
-        input[type=range]::-webkit-slider-thumb:hover {
-            transform: scale(1.3);
-        }
-
+        body{background:#141414;color:#fff;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+        .banner-fade{height:14rem;background:linear-gradient(180deg,transparent,rgba(20,20,20,.6),#141414);position:absolute;bottom:0;width:100%}
+        .hero-vig{background:linear-gradient(to top,#141414 0%,transparent 50%),linear-gradient(to right,#141414 0%,transparent 60%)}
+        .hero-zoom{animation:slowZoom 25s ease-out forwards}
+        @keyframes slowZoom{0%{transform:scale(1)}100%{transform:scale(1.08)}}
+        .nav-black{background:rgba(20,20,20,.97);backdrop-filter:blur(20px);box-shadow:0 2px 20px rgba(0,0,0,.8);transition:all .4s}
+        .nav-trans{background:linear-gradient(to bottom,rgba(0,0,0,.85),transparent);transition:all .4s}
+        ::-webkit-scrollbar{width:6px;height:6px}
+        ::-webkit-scrollbar-track{background:transparent}
+        ::-webkit-scrollbar-thumb{background:#444;border-radius:3px}
+        .row-scroll{display:flex;overflow-y:hidden;overflow-x:scroll;padding:20px 0 30px;scroll-behavior:smooth;scrollbar-width:none;-ms-overflow-style:none}
+        .row-scroll::-webkit-scrollbar{display:none}
+        .rposter{object-fit:cover;width:100%;border-radius:8px;transition:transform .35s cubic-bezier(.25,.46,.45,.94),box-shadow .35s;cursor:pointer;flex:0 0 calc(100%/2.3);aspect-ratio:16/9;margin-right:8px;will-change:transform;background:#1a1a1a;position:relative;overflow:hidden}
+        @media(min-width:640px){.rposter{flex:0 0 calc(100%/3.3);margin-right:10px}}
+        @media(min-width:768px){.rposter{flex:0 0 calc(100%/4.3)}}
+        @media(min-width:1024px){.rposter{flex:0 0 calc(100%/5.3)}}
+        @media(min-width:1280px){.rposter{flex:0 0 calc(100%/6.3)}}
+        .rposter:hover{transform:scale(1.08);z-index:10;box-shadow:0 10px 40px rgba(0,0,0,.9),0 0 15px rgba(229,9,20,.15)}
+        .ptitle-over{position:absolute;bottom:0;left:0;right:0;padding:30px 12px 10px;background:linear-gradient(to top,rgba(0,0,0,.95),rgba(0,0,0,.5) 70%,transparent);pointer-events:none;display:flex;align-items:flex-end;justify-content:center;border-radius:0 0 8px 8px}
+        .ptitle-txt{color:#fff;font-size:.85rem;font-weight:800;text-transform:uppercase;text-shadow:2px 2px 8px rgba(0,0,0,1);text-align:center;line-height:1.15;letter-spacing:.5px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;width:100%}
+        @media(min-width:768px){.ptitle-txt{font-size:1rem}}
+        .prog-wrap{width:100%;height:3px;background:rgba(128,128,128,.4);position:absolute;bottom:0;left:0;border-radius:0 0 8px 8px;overflow:hidden;z-index:20}
+        .prog-bar{height:100%;background:linear-gradient(90deg,#E50914,#ff4d4d);width:0%;transition:width .3s}
+        .skel{background:linear-gradient(90deg,#1a1a1a 25%,#2a2a2a 50%,#1a1a1a 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:8px}
+        @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+        .modal-bg{background:rgba(0,0,0,.85);backdrop-filter:blur(8px)}
+        .auth-bg{background-image:linear-gradient(to top,rgba(0,0,0,.95),rgba(0,0,0,.4) 50%,rgba(0,0,0,.95)),url('https://assets.nflxext.com/ffe/siteui/vlv3/9d3533b2-0e2b-40b2-95e0-eca797975213/fccfca8d-71b5-4a62-a5e2-66ffbc3f57ce/IN-en-20240311-popsignuptwoweeks-perspective_alpha_website_large.jpg');background-size:cover;background-position:center}
+        .av-opt{width:52px;height:52px;border-radius:6px;cursor:pointer;border:3px solid transparent;transition:all .2s;object-fit:cover}
+        .av-opt:hover{transform:scale(1.15);border-color:rgba(255,255,255,.4)}
+        .av-opt.sel{border-color:#E50914;transform:scale(1.15);box-shadow:0 0 15px rgba(229,9,20,.5)}
+        .intro-text{font-family:Inter,sans-serif;font-weight:900;font-size:3.5rem;color:#E50914;text-transform:uppercase;letter-spacing:8px;animation:iPop 1.2s cubic-bezier(.16,1,.3,1) forwards,iPulse 2s ease-in-out infinite 1.2s}
+        @media(min-width:768px){.intro-text{font-size:6rem;letter-spacing:14px}}
+        @keyframes iPop{0%{transform:scale(2.5);opacity:0;letter-spacing:-20px;filter:blur(20px)}40%{opacity:1;filter:blur(5px)}100%{transform:scale(1);opacity:1;letter-spacing:8px;filter:blur(0);text-shadow:0 0 30px rgba(229,9,20,.4)}}
+        @keyframes iPulse{0%{text-shadow:0 0 30px rgba(229,9,20,.4);transform:scale(1)}50%{text-shadow:0 0 60px rgba(229,9,20,.8);transform:scale(1.02)}100%{text-shadow:0 0 30px rgba(229,9,20,.4);transform:scale(1)}}
+        .t10badge{position:absolute;top:8px;left:8px;z-index:15;background:linear-gradient(135deg,#E50914,#B20710);color:#fff;font-size:.65rem;font-weight:900;padding:3px 8px;border-radius:4px;box-shadow:0 2px 10px rgba(229,9,20,.6);letter-spacing:1px}
+        .t10num{position:absolute;bottom:-8px;left:-5px;z-index:15;font-size:7rem;font-weight:900;line-height:1;color:transparent;-webkit-text-stroke:3px rgba(255,255,255,.25);text-shadow:0 0 30px rgba(0,0,0,.8);pointer-events:none;font-style:italic}
+        .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(100px);background:rgba(30,30,30,.95);backdrop-filter:blur(20px);border:1px solid rgba(229,9,20,.4);border-radius:12px;padding:14px 28px;z-index:9999;font-size:.9rem;font-weight:600;box-shadow:0 10px 40px rgba(0,0,0,.8),0 0 20px rgba(229,9,20,.2);transition:transform .4s cubic-bezier(.16,1,.3,1),opacity .4s;opacity:0;display:flex;align-items:center;gap:10px}
+        .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+        .mob-menu{position:fixed;top:0;left:0;width:280px;height:100vh;background:rgba(20,20,20,.98);backdrop-filter:blur(20px);z-index:500;transform:translateX(-100%);transition:transform .35s cubic-bezier(.16,1,.3,1);border-right:1px solid rgba(255,255,255,.08)}
+        .mob-menu.open{transform:translateX(0)}
+        .mob-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:499;opacity:0;pointer-events:none;transition:opacity .3s}
+        .mob-overlay.open{opacity:1;pointer-events:auto}
+        .srch-exp{width:280px!important;padding:10px 16px 10px 40px!important;opacity:1!important}
+        @media(max-width:640px){.srch-exp{width:200px!important}}
+        @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+        .anim-up{animation:fadeUp .5s ease forwards}
     </style>
 </head>
 <body class="antialiased">
 
-    <!-- Authentication Screen (Login/Signup) -->
-    <div id="auth-screen" class="fixed inset-0 z-[400] auth-bg flex items-center justify-center hidden">
-        <div class="bg-black/85 backdrop-blur-md p-10 sm:p-16 rounded-xl max-w-md w-full mx-4 shadow-[0_0_50px_rgba(0,0,0,0.8)] border border-gray-800">
-            <h1 class="text-netflix-red text-4xl font-black tracking-wide uppercase drop-shadow-md mb-8 text-center">Duoflix</h1>
-            
-            <h2 id="auth-title" class="text-3xl font-bold mb-8 text-white">Sign In</h2>
-            
-            <form id="auth-form" onsubmit="handleAuth(event)">
-                <input type="email" id="auth-email" placeholder="Email address" required class="w-full bg-[#333] border border-gray-600 text-white px-4 py-3 rounded outline-none focus:bg-[#444] mb-4 transition-colors">
-                <input type="password" id="auth-password" placeholder="Password" required class="w-full bg-[#333] border border-gray-600 text-white px-4 py-3 rounded outline-none focus:bg-[#444] mb-4 transition-colors">
-                
-                <!-- Avatar Selection (Only visible during Signup) -->
-                <div id="avatar-selection-container" class="hidden mb-6">
-                    <p class="text-gray-400 text-sm mb-2 font-medium">Choose your Avatar:</p>
-                    <div class="flex flex-wrap gap-3 justify-center max-h-32 overflow-y-auto custom-scrollbar" id="avatar-list">
-                        <!-- Avatars will be injected here -->
-                    </div>
-                </div>
+<!-- Toast -->
+<div id="toast" class="toast"><i class="fas fa-check-circle text-netflix-red"></i><span id="toast-msg">Saved!</span></div>
 
-                <p id="auth-error-msg" class="text-[#e87c03] text-sm mb-4 hidden"></p>
-                
-                <button type="submit" id="auth-btn" class="w-full bg-netflix-red hover:bg-red-700 text-white font-bold py-3 rounded transition-transform hover:scale-[1.02] active:scale-95 shadow-lg">Sign In</button>
-            </form>
-            
-            <div class="mt-10 text-gray-400 text-sm">
-                <span id="auth-toggle-text">New to Duoflix?</span> 
-                <button onclick="toggleAuthMode()" id="auth-toggle-btn" class="text-white hover:underline font-medium ml-1">Sign up now.</button>
-            </div>
+<!-- Mobile Overlay -->
+<div id="mob-overlay" class="mob-overlay" onclick="closeMob()"></div>
+
+<!-- Mobile Menu -->
+<div id="mob-menu" class="mob-menu">
+    <div class="p-6 border-b border-gray-800">
+        <div class="flex items-center gap-4">
+            <img id="mob-avatar" src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png" class="w-12 h-12 rounded-md border-2 border-gray-600">
+            <div><p class="font-bold text-white text-sm" id="mob-name">User</p><p class="text-xs text-gray-400" id="mob-email">user@email.com</p></div>
         </div>
     </div>
-
-    <!-- Global Loading Spinner -->
-    <div id="global-loader" class="fixed inset-0 z-[1000] bg-[#141414] flex flex-col items-center justify-center">
-        <h1 class="duoflix-intro">Duoflix</h1>
-    </div>
-
-    <!-- Navigation -->
-    <nav id="navbar" class="fixed w-full z-50 nav-transparent flex items-center justify-between px-4 md:px-12 py-4">
-        <div class="flex items-center gap-8">
-            <h1 class="text-netflix-red text-2xl md:text-3xl font-black cursor-pointer tracking-wide uppercase drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] hover:scale-105 transition-transform" onclick="renderHome()">Duoflix</h1>
-            
-            <ul class="hidden md:flex gap-6 text-sm text-gray-200 font-medium drop-shadow-md">
-                <li class="hover:text-white cursor-pointer transition" onclick="renderHome()">Home</li>
-                <li class="hover:text-white cursor-pointer transition" onclick="scrollToSection('tv-shows')">TV Shows</li>
-                <li class="hover:text-white cursor-pointer transition" onclick="scrollToSection('movies')">Movies</li>
-                <li class="hover:text-white cursor-pointer transition" onclick="scrollToSection('trending')">New & Popular</li>
-                <li class="hover:text-white cursor-pointer transition" onclick="showWatchlist()">My List</li>
-            </ul>
-        </div>
-        
-        <div class="flex items-center gap-6">
-            <div class="relative flex items-center">
-                <div id="search-box" class="hidden absolute right-8 flex items-center bg-black/80 backdrop-blur-md border border-gray-600 rounded-full px-3 py-1.5 transition-all shadow-xl">
-                    <i class="fas fa-search text-gray-400 text-sm mr-2"></i>
-                    <input type="text" id="search-input" placeholder="Titles, people, genres" class="bg-transparent text-white text-sm outline-none w-32 md:w-48">
-                    <i class="fas fa-times text-gray-400 cursor-pointer text-sm hover:text-white ml-2" onclick="toggleSearch()"></i>
-                </div>
-                <i class="fas fa-search text-white cursor-pointer text-xl hover:text-gray-300 transition-transform hover:scale-110 drop-shadow-md" onclick="toggleSearch()" id="search-icon"></i>
-            </div>
-            
-            <!-- Profile -->
-            <div class="flex items-center gap-2 cursor-pointer group relative">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png" alt="Profile" id="nav-profile-img" class="w-8 h-8 rounded-md shadow-md border border-transparent group-hover:border-white transition-colors">
-                <i class="fas fa-caret-down text-white text-xs group-hover:rotate-180 transition-transform duration-300 drop-shadow-md hidden md:block"></i>
-                
-                <div class="absolute top-10 right-0 bg-black/95 backdrop-blur-lg border border-gray-800 rounded-md w-56 hidden group-hover:block pt-2 pb-2 shadow-2xl">
-                    <div class="px-4 py-3 flex items-center gap-3 border-b border-gray-800 mb-1">
-                         <img src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png" id="dropdown-profile-img" class="w-10 h-10 rounded-md border border-gray-600">
-                         <div class="overflow-hidden">
-                             <p class="text-sm text-white font-bold truncate" id="dropdown-user-name">Account</p>
-                             <p class="text-xs text-gray-400 truncate" id="user-email-display">user@email.com</p>
-                         </div>
-                    </div>
-                    
-                    <div class="px-4 py-2.5 hover:bg-gray-800 hover:text-white text-gray-300 text-sm cursor-pointer transition-colors" onclick="openAccountSettings()"><i class="fas fa-pencil-alt mr-3 w-4 text-center"></i> Manage Profiles</div>
-                    <div class="px-4 py-2.5 hover:bg-gray-800 hover:text-white text-gray-300 text-sm cursor-pointer transition-colors" onclick="showWatchlist()"><i class="fas fa-list mr-3 w-4 text-center"></i> My List</div>
-                    <div class="mt-1 border-t border-gray-800 pt-1">
-                        <div class="px-4 py-3 hover:bg-netflix-red hover:text-white text-gray-300 text-sm cursor-pointer transition-colors text-center font-bold" onclick="logoutUser()">Sign out of Duoflix</div>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <nav class="py-4">
+        <a onclick="goHome();closeMob()" class="flex items-center gap-4 px-6 py-3.5 text-gray-200 hover:bg-white/5 hover:text-white transition cursor-pointer"><i class="fas fa-home w-6 text-center text-netflix-red"></i>Home</a>
+        <a onclick="goSection('tv-shows');closeMob()" class="flex items-center gap-4 px-6 py-3.5 text-gray-200 hover:bg-white/5 hover:text-white transition cursor-pointer"><i class="fas fa-tv w-6 text-center"></i>TV Shows</a>
+        <a onclick="goSection('movies');closeMob()" class="flex items-center gap-4 px-6 py-3.5 text-gray-200 hover:bg-white/5 hover:text-white transition cursor-pointer"><i class="fas fa-film w-6 text-center"></i>Movies</a>
+        <a onclick="goSection('trending');closeMob()" class="flex items-center gap-4 px-6 py-3.5 text-gray-200 hover:bg-white/5 hover:text-white transition cursor-pointer"><i class="fas fa-fire w-6 text-center"></i>New & Popular</a>
+        <a onclick="showWatchlist();closeMob()" class="flex items-center gap-4 px-6 py-3.5 text-gray-200 hover:bg-white/5 hover:text-white transition cursor-pointer"><i class="fas fa-list w-6 text-center"></i>My List</a>
     </nav>
+    <div class="absolute bottom-0 left-0 right-0 p-6 border-t border-gray-800">
+        <button onclick="doLogout();closeMob()" class="w-full text-left text-gray-400 hover:text-white transition text-sm flex items-center gap-3"><i class="fas fa-sign-out-alt w-6 text-center"></i>Sign Out</button>
+    </div>
+</div>
 
-    <!-- Account Settings Modal -->
-    <div id="account-settings-modal" class="fixed inset-0 z-[200] hidden items-center justify-center modal-overlay">
-        <div class="bg-[#181818]/95 backdrop-blur-xl p-8 rounded-xl max-w-md w-full mx-4 shadow-2xl border border-gray-700 relative">
-             <button onclick="closeAccountSettings()" class="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors">
-                <i class="fas fa-times text-2xl"></i>
-            </button>
-            <h2 class="text-2xl font-bold mb-6 text-white border-b border-gray-700 pb-3">Edit Profile</h2>
-            
-            <div class="flex items-start gap-6 mb-8">
-                <div class="relative group cursor-pointer shadow-lg">
-                    <img id="settings-current-avatar" src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png" class="w-24 h-24 rounded-md border-2 border-gray-600 group-hover:border-white transition-colors">
-                </div>
-                <div class="flex-grow pt-2">
-                    <div class="mb-3">
-                        <p class="text-xs text-gray-400 mb-1 uppercase font-bold tracking-wider">Profile Name</p>
-                        <input type="text" id="settings-name" placeholder="Enter your name" class="w-full bg-[#333] border border-gray-600 text-white px-3 py-2 rounded outline-none focus:border-netflix-red transition-colors text-sm font-medium">
-                    </div>
-                    <div>
-                        <p class="text-xs text-gray-400 mb-1 uppercase font-bold tracking-wider">Email</p>
-                        <p id="settings-email" class="text-gray-300 font-medium text-sm">...</p>
-                    </div>
-                </div>
+<!-- Auth Screen -->
+<div id="auth-screen" class="fixed inset-0 z-[400] auth-bg items-center justify-center hidden">
+    <div class="bg-black/85 backdrop-blur-xl p-10 sm:p-14 rounded-2xl max-w-md w-full mx-4 shadow-[0_0_80px_rgba(0,0,0,.9)] border border-gray-800/50">
+        <h1 class="text-netflix-red text-4xl font-black tracking-wider uppercase mb-10 text-center" style="text-shadow:0 0 30px rgba(229,9,20,.3)">Duoflix</h1>
+        <h2 id="auth-title" class="text-3xl font-bold mb-8 text-white">Sign In</h2>
+        <form id="auth-form">
+            <input type="email" id="a-email" placeholder="Email address" required class="w-full bg-[#333]/80 border border-gray-600/50 text-white px-5 py-3.5 rounded-lg outline-none focus:border-netflix-red focus:bg-[#444]/80 mb-4 transition-all placeholder-gray-500">
+            <input type="password" id="a-pass" placeholder="Password" required class="w-full bg-[#333]/80 border border-gray-600/50 text-white px-5 py-3.5 rounded-lg outline-none focus:border-netflix-red focus:bg-[#444]/80 mb-4 transition-all placeholder-gray-500">
+            <div id="av-sel-box" class="hidden mb-6">
+                <p class="text-gray-400 text-sm mb-3 font-semibold">Choose your Avatar:</p>
+                <div class="flex flex-wrap gap-3 justify-center max-h-32 overflow-y-auto pb-2" id="av-list"></div>
             </div>
-
-            <div class="mb-6">
-                <p class="text-sm text-gray-400 mb-3 font-medium">Choose Avatar</p>
-                <div class="flex flex-wrap gap-3 justify-start max-h-48 overflow-y-auto custom-scrollbar pb-2" id="settings-avatar-list">
-                    <!-- Avatars injected here -->
-                </div>
-            </div>
-
-            <button id="save-settings-btn" onclick="saveAccountSettings()" class="w-full bg-white hover:bg-gray-200 text-black font-bold py-3 rounded-lg transition-transform hover:scale-[1.02] shadow-lg text-lg">Save Changes</button>
+            <p id="a-err" class="text-[#e87c03] text-sm mb-4 hidden font-medium"></p>
+            <button type="submit" id="a-btn" class="w-full bg-netflix-red hover:bg-red-700 text-white font-bold py-3.5 rounded-lg transition-all hover:scale-[1.02] active:scale-95 shadow-[0_4px_20px_rgba(229,9,20,.4)] text-lg">Sign In</button>
+        </form>
+        <div class="mt-10 text-gray-400 text-sm">
+            <span id="a-tog-txt">New to Duoflix?</span>
+            <button onclick="togAuth()" id="a-tog-btn" class="text-white hover:underline font-semibold ml-1">Sign up now.</button>
+        </div>
+        <!-- Firestore Rules Warning -->
+        <div id="firestore-warning" class="hidden mt-6 bg-yellow-900/30 border border-yellow-600/50 rounded-lg p-4 text-xs text-yellow-300">
+            <i class="fas fa-exclamation-triangle mr-1"></i>
+            <strong>Firestore Rules:</strong> Make sure your Firebase Firestore rules allow authenticated users to read/write. Go to Firebase Console → Firestore → Rules and set:
+            <pre class="bg-black/50 p-2 rounded mt-2 text-yellow-200 overflow-x-auto">rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /artifacts/{appId}/users/{userId}/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}</pre>
         </div>
     </div>
+</div>
 
-    <!-- Search Results View -->
-    <div id="search-results-view" class="hidden min-h-screen pt-28 px-4 md:px-12 bg-[#141414] z-40 relative">
-        <h2 class="text-2xl font-bold mb-6 text-gray-400">Search Results for "<span id="search-query-display" class="text-white"></span>"</h2>
-        <div id="search-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 pb-20"></div>
+<!-- Global Loader -->
+<div id="loader" class="fixed inset-0 z-[1000] bg-[#141414] flex flex-col items-center justify-center">
+    <h1 class="intro-text">Duoflix</h1>
+    <p id="loader-status" class="text-gray-500 text-sm mt-6">Initializing...</p>
+</div>
+
+<!-- Nav -->
+<nav id="navbar" class="fixed w-full z-50 nav-trans flex items-center justify-between px-4 md:px-12 py-3">
+    <div class="flex items-center gap-6">
+        <button class="md:hidden text-white text-xl" onclick="openMob()"><i class="fas fa-bars"></i></button>
+        <h1 class="text-netflix-red text-2xl md:text-3xl font-black cursor-pointer tracking-wider uppercase hover:scale-105 transition-transform" onclick="goHome()" style="text-shadow:0 2px 10px rgba(229,9,20,.3)">Duoflix</h1>
+        <ul class="hidden md:flex gap-7 text-[13px] text-gray-300 font-semibold">
+            <li class="text-white cursor-pointer hover:text-gray-300 transition" onclick="goHome()">Home</li>
+            <li class="hover:text-white cursor-pointer transition" onclick="goSection('tv-shows')">TV Shows</li>
+            <li class="hover:text-white cursor-pointer transition" onclick="goSection('movies')">Movies</li>
+            <li class="hover:text-white cursor-pointer transition" onclick="goSection('trending')">New & Popular</li>
+            <li class="hover:text-white cursor-pointer transition" onclick="showWatchlist()">My List</li>
+        </ul>
     </div>
-
-    <!-- Watchlist View -->
-    <div id="watchlist-view" class="hidden min-h-screen pt-28 px-4 md:px-12 bg-[#141414] z-40 relative">
-        <h2 class="text-3xl font-bold mb-6 text-white drop-shadow-md">My List</h2>
-        <div id="watchlist-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 pb-20"></div>
-    </div>
-
-    <!-- Main Content (Home) -->
-    <div id="main-view" class="hidden">
-        <!-- Hero Banner -->
-        <header id="hero-banner" class="relative h-[85vh] md:h-[90vh] overflow-hidden text-white skeleton bg-[#141414]">
-            <div id="hero-bg-image" class="absolute inset-0 bg-cover bg-center transition-all duration-1000 ease-out hero-zoom"></div>
-            <div class="hero-vignette absolute inset-0 z-0"></div>
-            
-            <div class="absolute bottom-[20%] left-4 md:left-12 max-w-2xl z-10">
-                <h1 id="hero-title" class="text-5xl md:text-7xl font-black mb-4 drop-shadow-2xl tracking-tight text-white line-clamp-2 leading-tight">...</h1>
-                <p id="hero-overview" class="text-sm md:text-lg text-gray-200 drop-shadow-xl mb-8 line-clamp-3 md:line-clamp-4 max-w-xl font-medium leading-relaxed">Loading cinematic experience...</p>
-                <div class="flex gap-4">
-                    <button id="hero-play-btn" class="bg-white text-black px-6 md:px-8 py-2 md:py-3 rounded-md font-bold flex items-center gap-3 hover:bg-gray-200 hover:scale-105 shadow-[0_0_20px_rgba(255,255,255,0.3)] transition-all duration-300 text-lg">
-                        <i class="fas fa-play"></i> Play
-                    </button>
-                    <button id="hero-info-btn" class="bg-gray-500/60 backdrop-blur-md text-white px-6 md:px-8 py-2 md:py-3 rounded-md font-bold flex items-center gap-3 hover:bg-gray-500/80 hover:scale-105 shadow-xl transition-all duration-300 text-lg border border-transparent hover:border-gray-400">
-                        <i class="fas fa-info-circle text-xl"></i> More Info
-                    </button>
-                </div>
+    <div class="flex items-center gap-5">
+        <div class="relative flex items-center">
+            <div id="srch-box" class="absolute right-0 flex items-center bg-black/80 backdrop-blur-xl border border-gray-500/50 rounded-full overflow-hidden transition-all duration-500 w-0 opacity-0" style="height:40px">
+                <i class="fas fa-search text-gray-400 text-sm absolute left-3.5 pointer-events-none"></i>
+                <input type="text" id="srch-input" placeholder="Titles, people, genres" class="bg-transparent text-white text-sm outline-none w-0 transition-all duration-300 pl-9 pr-3 font-medium" oninput="doSearch(this.value)">
+                <button class="pr-3 text-gray-400 hover:text-white transition text-sm" onclick="togSearch()"><i class="fas fa-times"></i></button>
             </div>
-            <div class="banner-fadeBottom z-0"></div>
-        </header>
-
-        <div class="pl-4 md:pl-12 pb-20 -mt-24 md:-mt-32 relative z-20 space-y-8 md:space-y-12" id="rows-container">
-            <!-- Rows dynamically injected here -->
+            <i class="fas fa-search text-white cursor-pointer text-lg hover:text-netflix-red transition-all hover:scale-110" onclick="togSearch()" id="srch-icon"></i>
         </div>
-    </div>
-
-    <!-- Movie/TV Details Modal -->
-    <div id="details-modal" class="fixed inset-0 z-[100] hidden overflow-y-auto">
-        <div class="modal-overlay absolute inset-0" onclick="closeModal()"></div>
-        <div class="relative w-full max-w-5xl mx-auto my-8 bg-[#181818] rounded-xl shadow-[0_0_50px_rgba(0,0,0,0.8)] overflow-hidden z-10 border border-gray-800">
-            
-            <button onclick="closeModal()" class="absolute top-4 right-4 z-50 bg-[#181818]/80 backdrop-blur-md w-10 h-10 rounded-full flex items-center justify-center hover:bg-white hover:text-black transition-colors text-white border border-gray-600 shadow-lg">
-                <i class="fas fa-times text-xl"></i>
-            </button>
-
-            <!-- Header Backdrop -->
-            <div class="relative h-72 md:h-[450px] w-full skeleton" id="modal-backdrop">
-                <div class="absolute inset-0 bg-gradient-to-t from-[#181818] via-[#181818]/60 to-transparent"></div>
-                <div class="absolute bottom-6 left-8 right-8 max-w-3xl">
-                    <h2 id="modal-title" class="text-4xl md:text-5xl font-black drop-shadow-2xl mb-4 leading-tight">...</h2>
-                    <div class="flex items-center gap-4 text-sm font-semibold mb-6">
-                        <span id="modal-match" class="text-green-500 drop-shadow">98% Match</span>
-                        <span id="modal-year" class="text-gray-300 drop-shadow">...</span>
-                        <span id="modal-rating" class="border border-gray-500 px-2 py-0.5 rounded text-gray-300">...</span>
-                        <span id="modal-runtime" class="text-gray-300 drop-shadow">...</span>
-                    </div>
-                    <div class="flex gap-4 mb-2">
-                        <button id="modal-play-btn" class="bg-white text-black px-8 py-2.5 rounded-md font-bold flex items-center gap-2 hover:bg-gray-200 hover:scale-105 transition-all shadow-lg text-lg">
-                            <i class="fas fa-play"></i> Play
-                        </button>
-                        <button id="modal-add-btn" class="bg-[#2a2a2a]/80 backdrop-blur border border-gray-500 text-white w-12 h-12 rounded-full flex items-center justify-center hover:border-white hover:bg-[#404040] hover:scale-110 transition-all shadow-lg">
-                            <i class="fas fa-plus text-xl" id="modal-add-icon"></i>
-                        </button>
-                    </div>
+        <div class="flex items-center gap-2 cursor-pointer group relative">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png" id="nav-av" class="w-8 h-8 rounded-md shadow-lg border-2 border-transparent group-hover:border-netflix-red transition-colors">
+            <i class="fas fa-caret-down text-white text-xs group-hover:rotate-180 transition-transform duration-300 hidden md:block"></i>
+            <div class="absolute top-12 right-0 bg-[#1a1a1a]/98 backdrop-blur-2xl border border-gray-700/50 rounded-lg w-60 hidden group-hover:block shadow-[0_10px_50px_rgba(0,0,0,.9)] overflow-hidden">
+                <div class="px-4 py-4 flex items-center gap-3 border-b border-gray-800">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png" id="dd-av" class="w-10 h-10 rounded-md border border-gray-600">
+                    <div class="overflow-hidden"><p class="text-sm text-white font-bold truncate" id="dd-name">Account</p><p class="text-xs text-gray-400 truncate" id="dd-email">user@email.com</p></div>
                 </div>
-            </div>
-
-            <!-- Details Content -->
-            <div class="px-8 py-6 grid grid-cols-1 md:grid-cols-3 gap-10 bg-[#181818]">
-                <div class="col-span-2">
-                    <p id="modal-overview" class="text-base md:text-lg text-gray-200 leading-relaxed mb-8 font-medium">...</p>
-                    
-                    <div id="tv-controls" class="hidden mb-6 bg-[#222] p-5 rounded-xl border border-gray-800 shadow-inner">
-                        <div class="flex justify-between items-center mb-6">
-                            <h3 class="text-2xl font-bold text-white">Episodes</h3>
-                            <select id="season-selector" class="bg-[#333] border border-gray-600 text-white px-4 py-2 rounded-md outline-none focus:border-netflix-red font-medium shadow-sm" onchange="loadEpisodes(this.value)">
-                            </select>
-                        </div>
-                        <div id="episodes-list" class="max-h-96 overflow-y-auto pr-3 space-y-3 custom-scrollbar"></div>
-                    </div>
+                <div class="py-1">
+                    <div class="px-4 py-2.5 hover:bg-white/5 text-gray-300 hover:text-white text-sm cursor-pointer transition-colors flex items-center gap-3" onclick="openSettings()"><i class="fas fa-pencil-alt w-4 text-center text-xs"></i>Manage Profiles</div>
+                    <div class="px-4 py-2.5 hover:bg-white/5 text-gray-300 hover:text-white text-sm cursor-pointer transition-colors flex items-center gap-3" onclick="showWatchlist()"><i class="fas fa-list w-4 text-center text-xs"></i>My List</div>
                 </div>
-                
-                <div class="col-span-1 text-sm md:text-base text-gray-400 space-y-6">
-                    <div><span class="text-gray-500 block mb-1">Cast</span><span id="modal-cast" class="text-white leading-relaxed">...</span></div>
-                    <div><span class="text-gray-500 block mb-1">Genres</span><span id="modal-genres" class="text-white leading-relaxed">...</span></div>
+                <div class="border-t border-gray-800 py-1">
+                    <div class="px-4 py-3 hover:bg-netflix-red/20 text-gray-300 hover:text-netflix-red text-sm cursor-pointer transition-colors text-center font-bold" onclick="doLogout()">Sign out of Duoflix</div>
                 </div>
-            </div>
-
-            <!-- Similar Section -->
-            <div class="px-8 py-8 bg-[#141414] border-t border-gray-800">
-                <h3 class="text-2xl font-bold mb-6 text-white">More Like This</h3>
-                <div id="modal-similar" class="grid grid-cols-2 md:grid-cols-3 gap-4"></div>
             </div>
         </div>
     </div>
+</nav>
 
-    <!-- Vidking Video Player Overlay -->
-    <div id="player-overlay" class="fixed inset-0 z-[999] bg-black hidden flex-col transition-all duration-300">
-        <div class="p-4 md:p-6 flex justify-between items-center bg-gradient-to-b from-black/90 to-transparent absolute top-0 w-full z-10 pointer-events-auto">
-            <button onclick="closePlayer()" class="text-white flex items-center gap-2 hover:text-gray-300 transition-colors drop-shadow-md text-lg">
-                <i class="fas fa-arrow-left text-xl"></i> Back
-            </button>
-            <div id="player-title" class="text-white font-bold text-lg md:text-xl truncate w-1/2 text-center drop-shadow-md"></div>
-            <div class="w-16"></div> <!-- Spacer -->
+<!-- Settings Modal -->
+<div id="settings-modal" class="fixed inset-0 z-[200] hidden items-center justify-center modal-bg">
+    <div class="bg-[#181818]/98 backdrop-blur-2xl p-8 rounded-2xl max-w-md w-full mx-4 shadow-[0_0_80px_rgba(0,0,0,.9)] border border-gray-700/50 relative anim-up">
+        <button onclick="closeSettings()" class="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10"><i class="fas fa-times text-xl"></i></button>
+        <h2 class="text-2xl font-bold mb-8 text-white">Edit Profile</h2>
+        <div class="flex items-start gap-6 mb-8">
+            <div class="relative group cursor-pointer">
+                <img id="set-av" src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png" class="w-24 h-24 rounded-xl border-2 border-gray-600 group-hover:border-netflix-red transition-colors shadow-lg object-cover">
+                <div class="absolute inset-0 bg-black/50 rounded-xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><i class="fas fa-camera text-white text-xl"></i></div>
+            </div>
+            <div class="flex-grow pt-1">
+                <div class="mb-4">
+                    <p class="text-xs text-gray-400 mb-1.5 uppercase font-bold tracking-widest">Profile Name</p>
+                    <input type="text" id="set-name" placeholder="Enter your name" class="w-full bg-[#333]/80 border border-gray-600/50 text-white px-4 py-2.5 rounded-lg outline-none focus:border-netflix-red transition-colors text-sm font-medium">
+                </div>
+                <div><p class="text-xs text-gray-400 mb-1.5 uppercase font-bold tracking-widest">Email</p><p id="set-email" class="text-gray-300 font-medium text-sm">...</p></div>
+            </div>
         </div>
-        <div class="flex-grow w-full h-full flex items-center justify-center relative bg-black">
-            <div id="iframe-container" class="w-full h-full"></div>
+        <div class="mb-8">
+            <p class="text-sm text-gray-400 mb-3 font-semibold">Choose Avatar</p>
+            <div class="flex flex-wrap gap-3 justify-start max-h-40 overflow-y-auto pb-2" id="set-av-list"></div>
+        </div>
+        <button id="save-btn" onclick="saveSettings()" class="w-full bg-white hover:bg-gray-100 text-black font-bold py-3.5 rounded-lg transition-all hover:scale-[1.02] active:scale-95 shadow-xl text-lg">Save Changes</button>
+    </div>
+</div>
+
+<!-- Search View -->
+<div id="srch-view" class="hidden min-h-screen pt-28 px-4 md:px-12 bg-[#141414] z-40 relative">
+    <h2 class="text-xl font-bold mb-8 text-gray-300">Search Results for "<span id="srch-q" class="text-white font-black"></span>"</h2>
+    <div id="srch-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 pb-20"></div>
+</div>
+
+<!-- Watchlist View -->
+<div id="wl-view" class="hidden min-h-screen pt-28 px-4 md:px-12 bg-[#141414] z-40 relative">
+    <h2 class="text-3xl font-black mb-8 text-white">My List</h2>
+    <div id="wl-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 pb-20"></div>
+</div>
+
+<!-- Main View -->
+<div id="main-view" class="hidden">
+    <header id="hero" class="relative h-[85vh] md:h-[92vh] overflow-hidden text-white skel bg-[#141414]">
+        <div id="hero-bg" class="absolute inset-0 bg-cover bg-center transition-all duration-1000 ease-out hero-zoom"></div>
+        <div class="hero-vig absolute inset-0 z-0"></div>
+        <div class="absolute bottom-[15%] left-0 w-[500px] h-[300px] bg-netflix-red/10 rounded-full blur-[120px] z-0 pointer-events-none"></div>
+        <div class="absolute bottom-[20%] left-4 md:left-12 max-w-2xl z-10">
+            <div id="hero-badge" class="hidden mb-4 items-center gap-2">
+                <span class="bg-netflix-red px-3 py-1 rounded text-xs font-black tracking-wider uppercase shadow-[0_0_15px_rgba(229,9,20,.5)]">New</span>
+            </div>
+            <h1 id="hero-title" class="text-5xl md:text-7xl font-black mb-5 tracking-tight text-white line-clamp-2 leading-[1.05]" style="text-shadow:0 4px 30px rgba(0,0,0,.8)">...</h1>
+            <p id="hero-desc" class="text-sm md:text-lg text-gray-200 mb-8 line-clamp-3 md:line-clamp-4 max-w-xl font-medium leading-relaxed" style="text-shadow:0 2px 10px rgba(0,0,0,.8)">Loading...</p>
+            <div class="flex gap-4 flex-wrap">
+                <button id="hero-play" class="bg-white text-black px-7 md:px-10 py-2.5 md:py-3 rounded-lg font-bold flex items-center gap-3 hover:bg-gray-200 hover:scale-105 shadow-[0_4px_30px_rgba(255,255,255,.3)] transition-all text-lg"><i class="fas fa-play"></i>Play</button>
+                <button id="hero-info" class="bg-gray-500/50 backdrop-blur-md text-white px-7 md:px-10 py-2.5 md:py-3 rounded-lg font-bold flex items-center gap-3 hover:bg-gray-500/70 hover:scale-105 shadow-xl transition-all text-lg border border-white/10"><i class="fas fa-info-circle text-xl"></i>More Info</button>
+            </div>
+        </div>
+        <div class="banner-fade z-0"></div>
+    </header>
+    <div class="pl-4 md:pl-12 pb-20 -mt-28 md:-mt-36 relative z-20 space-y-10 md:space-y-14" id="rows-box"></div>
+</div>
+
+<!-- Details Modal -->
+<div id="det-modal" class="fixed inset-0 z-[100] hidden overflow-y-auto">
+    <div class="modal-bg absolute inset-0" onclick="closeDet()"></div>
+    <div class="relative w-full max-w-5xl mx-auto my-4 md:my-8 bg-[#181818] rounded-2xl shadow-[0_0_80px_rgba(0,0,0,.9)] overflow-hidden z-10 border border-gray-800/50 anim-up">
+        <button onclick="closeDet()" class="absolute top-4 right-4 z-50 bg-[#181818]/90 backdrop-blur-md w-10 h-10 rounded-full flex items-center justify-center hover:bg-white hover:text-black transition-colors text-white border border-gray-600/50 shadow-lg"><i class="fas fa-times"></i></button>
+        <div class="relative h-72 md:h-[420px] w-full skel" id="m-backdrop">
+            <div class="absolute inset-0 bg-gradient-to-t from-[#181818] via-[#181818]/50 to-transparent"></div>
+            <div class="absolute bottom-6 left-8 right-8 max-w-3xl">
+                <h2 id="m-title" class="text-3xl md:text-5xl font-black drop-shadow-2xl mb-4 leading-tight">...</h2>
+                <div class="flex items-center gap-4 text-sm font-bold mb-5 flex-wrap">
+                    <span id="m-match" class="text-green-400">98% Match</span>
+                    <span id="m-year" class="text-gray-300">...</span>
+                    <span id="m-rating" class="border border-gray-500/50 px-2 py-0.5 rounded text-gray-300 text-xs">...</span>
+                    <span id="m-runtime" class="text-gray-300">...</span>
+                </div>
+                <div class="flex gap-3 mb-2">
+                    <button id="m-play" class="bg-white text-black px-8 py-2.5 rounded-lg font-bold flex items-center gap-2 hover:bg-gray-200 hover:scale-105 transition-all shadow-lg text-lg"><i class="fas fa-play"></i>Play</button>
+                    <button id="m-add" class="bg-[#2a2a2a]/80 backdrop-blur-md border border-gray-500/50 text-white w-12 h-12 rounded-full flex items-center justify-center hover:border-white hover:bg-[#404040] hover:scale-110 transition-all shadow-lg"><i class="fas fa-plus text-xl" id="m-add-icon"></i></button>
+                </div>
+            </div>
+        </div>
+        <div class="px-8 py-6 grid grid-cols-1 md:grid-cols-3 gap-10 bg-[#181818]">
+            <div class="col-span-2">
+                <p id="m-overview" class="text-base md:text-lg text-gray-200 leading-relaxed mb-8 font-medium">...</p>
+                <div id="tv-ctrl" class="hidden mb-6 bg-[#222] p-5 rounded-xl border border-gray-800">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-bold text-white">Episodes</h3>
+                        <select id="season-sel" class="bg-[#333] border border-gray-600/50 text-white px-4 py-2 rounded-lg outline-none focus:border-netflix-red font-medium"></select>
+                    </div>
+                    <div id="ep-list" class="max-h-96 overflow-y-auto pr-3 space-y-2"></div>
+                </div>
+            </div>
+            <div class="col-span-1 text-sm text-gray-400 space-y-5">
+                <div><span class="text-gray-500 block mb-1 text-xs uppercase tracking-widest font-bold">Cast</span><span id="m-cast" class="text-white leading-relaxed">...</span></div>
+                <div><span class="text-gray-500 block mb-1 text-xs uppercase tracking-widest font-bold">Genres</span><span id="m-genres" class="text-white leading-relaxed">...</span></div>
+            </div>
+        </div>
+        <div class="px-8 py-8 bg-[#141414] border-t border-gray-800/50">
+            <h3 class="text-xl font-bold mb-6 text-white">More Like This</h3>
+            <div id="m-similar" class="grid grid-cols-2 md:grid-cols-3 gap-4"></div>
         </div>
     </div>
+</div>
 
-    <!-- Firebase & Core Application Logic -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+<!-- Player -->
+<div id="player" class="fixed inset-0 z-[999] bg-black hidden flex-col">
+    <div class="p-4 md:p-6 flex justify-between items-center bg-gradient-to-b from-black/90 to-transparent absolute top-0 w-full z-10">
+        <button onclick="closePlay()" class="text-white flex items-center gap-2 hover:text-gray-300 transition-colors text-lg"><i class="fas fa-arrow-left text-xl"></i><span class="hidden sm:inline">Back</span></button>
+        <div id="p-title" class="text-white font-bold text-lg md:text-xl truncate max-w-[60%] text-center"></div>
+        <div class="w-16"></div>
+    </div>
+    <div class="flex-grow w-full h-full flex items-center justify-center relative bg-black">
+        <div id="p-iframe" class="w-full h-full"></div>
+    </div>
+</div>
 
-        // Provided Configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyAJVq9E8tVo7qdavEdSgRZmBhMtcwrUa3k",
-            authDomain: "duoflix-4c456.firebaseapp.com",
-            projectId: "duoflix-4c456",
-            storageBucket: "duoflix-4c456.firebasestorage.app",
-            messagingSenderId: "783837905937",
-            appId: "1:783837905937:web:5e43ef409f320124689db0"
-        };
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, collection, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+    const firebaseConfig = {
+        apiKey: "AIzaSyAJVq9E8tVo7qdavEdSgRZmBhMtcwrUa3k",
+        authDomain: "duoflix-4c456.firebaseapp.com",
+        projectId: "duoflix-4c456",
+        storageBucket: "duoflix-4c456.firebasestorage.app",
+        messagingSenderId: "783837905937",
+        appId: "1:783837905937:web:5e43ef409f320124689db0"
+    };
 
-        // State Variables
-        const APP_ID = 'duoflix_main'; 
-        const BASE_URL = 'https://api.themoviedb.org/3';
-        const IMG_URL = 'https://image.tmdb.org/t/p/w500';
-        const IMG_URL_ORIGINAL = 'https://image.tmdb.org/t/p/original';
-        const FALLBACK_IMG = 'https://via.placeholder.com/500x281/222/555?text=Duoflix';
+    let app, auth2, db2;
+    try {
+        app = initializeApp(firebaseConfig);
+        auth2 = getAuth(app);
+        db2 = getFirestore(app);
+        console.log("[Duoflix] Firebase initialized OK");
+    } catch(e) {
+        console.error("[Duoflix] Firebase init FAILED:", e);
+    }
+
+    const AID = 'duoflix_main';
+    const BASE = 'https://api.themoviedb.org/3';
+    const IMG = 'https://image.tmdb.org/t/p/w500';
+    const IMGO = 'https://image.tmdb.org/t/p/original';
+    const FALL = 'https://via.placeholder.com/500x281/1a1a1a/333?text=Duoflix';
+
+    // API Key
+    const _k = ['OTg1MWNi','NDI2YmZi','ZDlkMWFk','MjFiZTUy','YTJkNmE4','Y2M='];
+    const AK = atob(_k.join(''));
+    console.log("[Duoflix] API Key loaded:", AK ? "Yes" : "No");
+
+    const AVS = [
+        'https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png',
+        'https://api.dicebear.com/8.x/avataaars/svg?seed=Leo',
+        'https://api.dicebear.com/8.x/avataaars/svg?seed=Mia',
+        'https://api.dicebear.com/8.x/avataaars/svg?seed=Sam',
+        'https://api.dicebear.com/8.x/avataaars/svg?seed=Zoe',
+        'https://api.dicebear.com/8.x/avataaars/svg?seed=Max',
+        'https://api.dicebear.com/8.x/avataaars/svg?seed=Lia',
+        'https://api.dicebear.com/8.x/avataaars/svg?seed=Eli',
+        'https://api.dicebear.com/8.x/avataaars/svg?seed=Ava',
+        'https://api.dicebear.com/8.x/avataaars/svg?seed=Ian',
+        'https://api.dicebear.com/8.x/avataaars/svg?seed=Joy',
+        'https://api.dicebear.com/8.x/avataaars/svg?seed=Ray',
+        'https://api.dicebear.com/8.x/avataaars/svg?seed=Sue',
+        'https://api.dicebear.com/8.x/avataaars/svg?seed=Tom',
+        'https://api.dicebear.com/8.x/avataaars/svg?seed=Ann'
+    ];
+
+    let curUser = null;
+    let userData = { avatar: AVS[0], name: 'User' };
+    let wl = [];
+    let cw = {};
+    let curMedia = null;
+    let srchTO = null;
+    let fetching = false;
+    let aMode = 'login';
+    let signupAvIdx = 0;
+    let settingsAvIdx = 0;
+    let unsubW = null, unsubP = null, unsubU = null;
+
+    const EP = {
+        trending: '/trending/all/week',
+        originals: '/discover/tv?with_networks=213',
+        topRated: '/movie/top_rated',
+        action: '/discover/movie?with_genres=28',
+        comedy: '/discover/movie?with_genres=35',
+        horror: '/discover/movie?with_genres=27',
+    };
+
+    // ===== SAFETY: Auto-hide loader after 8 seconds =====
+    setTimeout(() => {
+        const l = document.getElementById('loader');
+        if (l && !l.classList.contains('hidden')) {
+            l.classList.add('hidden');
+            console.warn("[Duoflix] Safety timeout: loader force-hidden");
+        }
+    }, 8000);
+
+    // ===== TOAST =====
+    let toastT = null;
+    function showToast(msg, icon) {
+        const t = document.getElementById('toast');
+        document.getElementById('toast-msg').innerText = msg;
+        t.querySelector('i').className = 'fas ' + (icon || 'fa-check-circle') + ' text-netflix-red';
+        t.classList.add('show');
+        clearTimeout(toastT);
+        toastT = setTimeout(() => t.classList.remove('show'), 3000);
+    }
+    window.showToast = showToast;
+
+    // ===== MOBILE MENU =====
+    window.openMob = () => { document.getElementById('mob-menu').classList.add('open'); document.getElementById('mob-overlay').classList.add('open'); };
+    window.closeMob = () => { document.getElementById('mob-menu').classList.remove('open'); document.getElementById('mob-overlay').classList.remove('open'); };
+
+    // ===== AVATAR RENDERING (INDEX-BASED - NO URL ESCAPING ISSUES) =====
+    function renderAvs(cid, selIdx, hFn) {
+        const c = document.getElementById(cid);
+        if (!c) return;
+        c.innerHTML = AVS.map((u, i) => '<img src="' + u + '" class="av-opt ' + (i === selIdx ? 'sel' : '') + '" onclick="' + hFn + '(' + i + ')" alt="Avatar ' + (i+1) + '">').join('');
+    }
+    window.pickSignupAv = (i) => { signupAvIdx = i; renderAvs('av-list', signupAvIdx, 'pickSignupAv'); };
+    window.pickSettingsAv = (i) => { settingsAvIdx = i; renderAvs('set-av-list', settingsAvIdx, 'pickSettingsAv'); document.getElementById('set-av').src = AVS[i]; };
+
+    // ===== AUTH =====
+    function setLoaderStatus(txt) {
+        const s = document.getElementById('loader-status');
+        if (s) s.innerText = txt;
+    }
+
+    onAuthStateChanged(auth2, async (user) => {
+        console.log("[Duoflix] Auth state:", user ? "Logged in as " + user.email : "No user");
+        setLoaderStatus(user ? "Loading your profile..." : "Please sign in");
         
-        // --- API KEY OBFUSCATION ---
-        // Hidden API Key logic using array splits and Base64 so it's not plain text.
-        const _k = ['OTg1MWNi', 'NDI2YmZi', 'ZDlkMWFk', 'MjFiZTUy', 'YTJkNmE4', 'Y2M='];
-        const API_KEY = atob(_k.join(''));
+        const loader = document.getElementById('loader');
+        if (loader) loader.classList.add('hidden');
+
+        if (user) {
+            curUser = user;
+            document.getElementById('auth-screen').classList.add('hidden');
+            document.getElementById('auth-screen').style.display = 'none';
+            document.getElementById('dd-email').innerText = user.email;
+            document.getElementById('set-email').innerText = user.email;
+            document.getElementById('mob-email').innerText = user.email;
+
+            // Ensure profile doc exists
+            try {
+                const pRef = doc(db2, 'artifacts', AID, 'users', user.uid, 'profile', 'info');
+                const pSnap = await getDoc(pRef);
+                if (!pSnap.exists()) {
+                    await setDoc(pRef, { avatar: AVS[0], name: user.email.split('@')[0], createdAt: Date.now() });
+                    console.log("[Duoflix] Profile doc created");
+                }
+            } catch(e) {
+                console.error("[Duoflix] Profile doc error:", e.message);
+                document.getElementById('firestore-warning').classList.remove('hidden');
+            }
+
+            try { subscribeData(); } catch(e) { console.error("[Duoflix] Subscribe error:", e); }
+
+            document.getElementById('main-view').classList.remove('hidden');
+            document.getElementById('main-view').style.display = '';
+            initApp();
+        } else {
+            curUser = null;
+            cleanData();
+            const as = document.getElementById('auth-screen');
+            as.classList.remove('hidden');
+            as.style.display = 'flex';
+            document.getElementById('main-view').classList.add('hidden');
+            document.getElementById('wl-view').classList.add('hidden');
+            document.getElementById('srch-view').classList.add('hidden');
+            renderAvs('av-list', signupAvIdx, 'pickSignupAv');
+        }
+    });
+
+    window.togAuth = () => {
+        aMode = aMode === 'login' ? 'signup' : 'login';
+        document.getElementById('auth-title').innerText = aMode === 'login' ? 'Sign In' : 'Sign Up';
+        document.getElementById('a-btn').innerText = aMode === 'login' ? 'Sign In' : 'Sign Up';
+        document.getElementById('a-tog-txt').innerText = aMode === 'login' ? 'New to Duoflix?' : 'Already have an account?';
+        document.getElementById('a-tog-btn').innerText = aMode === 'login' ? 'Sign up now.' : 'Sign in.';
+        document.getElementById('a-err').classList.add('hidden');
+        aMode === 'signup' ? document.getElementById('av-sel-box').classList.remove('hidden') : document.getElementById('av-sel-box').classList.add('hidden');
+    };
+
+    document.getElementById('auth-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('a-email').value;
+        const pass = document.getElementById('a-pass').value;
+        const errEl = document.getElementById('a-err');
+        const btn = document.getElementById('a-btn');
+        btn.disabled = true; btn.innerText = "Please wait...";
+        try {
+            if (aMode === 'login') {
+                await signInWithEmailAndPassword(auth2, email, pass);
+            } else {
+                const cred = await createUserWithEmailAndPassword(auth2, email, pass);
+                await setDoc(doc(db2, 'artifacts', AID, 'users', cred.user.uid, 'profile', 'info'), {
+                    avatar: AVS[signupAvIdx], name: email.split('@')[0], createdAt: Date.now()
+                });
+            }
+            errEl.classList.add('hidden');
+        } catch(error) {
+            let msg = "An error occurred.";
+            const c = error.code;
+            if (c === 'auth/invalid-credential' || c === 'auth/user-not-found' || c === 'auth/wrong-password') msg = "Invalid email or password.";
+            else if (c === 'auth/email-already-in-use') msg = "Email already in use. Sign in.";
+            else if (c === 'auth/weak-password') msg = "Password must be at least 6 characters.";
+            else if (c === 'auth/invalid-email') msg = "Enter a valid email.";
+            else if (c === 'auth/too-many-requests') msg = "Too many attempts. Try later.";
+            else msg = error.message.replace('Firebase: ', '');
+            errEl.innerText = msg; errEl.classList.remove('hidden');
+            // Show Firestore warning on permission errors
+            if (error.message && error.message.includes('permission')) {
+                document.getElementById('firestore-warning').classList.remove('hidden');
+            }
+        } finally { btn.disabled = false; btn.innerText = aMode === 'login' ? 'Sign In' : 'Sign Up'; }
+    });
+
+    window.doLogout = async () => { try { await signOut(auth2); } catch(e) { console.error(e); } };
+
+    // ===== SETTINGS =====
+    window.openSettings = () => {
+        const m = document.getElementById('settings-modal');
+        m.classList.remove('hidden'); m.classList.add('flex');
+        settingsAvIdx = AVS.indexOf(userData.avatar);
+        if (settingsAvIdx === -1) settingsAvIdx = 0;
+        document.getElementById('set-av').src = AVS[settingsAvIdx];
+        document.getElementById('set-name').value = userData.name || '';
+        renderAvs('set-av-list', settingsAvIdx, 'pickSettingsAv');
+    };
+    window.closeSettings = () => { const m = document.getElementById('settings-modal'); m.classList.add('hidden'); m.classList.remove('flex'); };
+
+    window.saveSettings = async () => {
+        if (!curUser) return;
+        const btn = document.getElementById('save-btn');
+        const orig = btn.innerText; btn.innerText = "Saving..."; btn.disabled = true;
+        const nn = document.getElementById('set-name').value.trim() || 'User';
+        const na = AVS[settingsAvIdx];
+        try {
+            await setDoc(doc(db2, 'artifacts', AID, 'users', curUser.uid, 'profile', 'info'), {
+                avatar: na, name: nn, updatedAt: Date.now()
+            }, { merge: true });
+            closeSettings();
+            showToast('Profile updated!');
+        } catch(e) {
+            console.error("Save error:", e);
+            showToast('Failed to save', 'fa-exclamation-circle');
+            if (e.message && e.message.includes('permission')) {
+                document.getElementById('firestore-warning').classList.remove('hidden');
+            }
+        } finally { btn.innerText = orig; btn.disabled = false; }
+    };
+
+    // ===== FIRESTORE SUBSCRIBE =====
+    function subscribeData() {
+        if (!curUser) return;
+        const uid = curUser.uid;
+        console.log("[Duoflix] Subscribing to data for", uid);
+
+        unsubU = onSnapshot(doc(db2, 'artifacts', AID, 'users', uid, 'profile', 'info'), (snap) => {
+            if (snap.exists()) {
+                userData.avatar = snap.data().avatar || AVS[0];
+                userData.name = snap.data().name || 'User';
+            }
+            document.getElementById('nav-av').src = userData.avatar;
+            document.getElementById('dd-av').src = userData.avatar;
+            document.getElementById('dd-name').innerText = userData.name;
+            document.getElementById('mob-avatar').src = userData.avatar;
+            document.getElementById('mob-name').innerText = userData.name;
+        }, (e) => { console.error("[Duoflix] Profile sync error:", e.message); });
+
+        unsubW = onSnapshot(collection(db2, 'artifacts', AID, 'users', uid, 'watchlist'), (snap) => {
+            wl = []; snap.forEach(d => wl.push(d.data()));
+            if (curMedia) updWLUI(wl.some(i => i.id === curMedia.id && i.type === curMedia.type));
+            if (!document.getElementById('wl-view').classList.contains('hidden')) showWatchlist();
+        }, (e) => { console.error("[Duoflix] Watchlist sync error:", e.message); });
+
+        unsubP = onSnapshot(collection(db2, 'artifacts', AID, 'users', uid, 'progress'), (snap) => {
+            cw = {}; snap.forEach(d => { cw[d.id] = d.data(); });
+            buildCWRow();
+        }, (e) => { console.error("[Duoflix] Progress sync error:", e.message); });
+    }
+
+    function cleanData() {
+        if (unsubW) unsubW(); if (unsubP) unsubP(); if (unsubU) unsubU();
+        wl = []; cw = {};
+        document.getElementById('rows-box').innerHTML = '';
+    }
+
+    // ===== TMDB =====
+    async function fetchT(endpoint) {
+        const sep = endpoint.includes('?') ? '&' : '?';
+        const url = BASE + endpoint + sep + 'api_key=' + AK;
+        console.log("[Duoflix] Fetching:", url);
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('API ' + res.status);
+        return res.json();
+    }
+
+    async function initApp() {
+        if (fetching) return;
+        fetching = true;
+        console.log("[Duoflix] Initializing app...");
+        setLoaderStatus("Loading movies...");
         
-        // Netflix default & 14 unique generated avatars
-        const AVATARS = [
-            'https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png',
-            'https://api.dicebear.com/8.x/avataaars/svg?seed=Leo&backgroundColor=ffdfbf',
-            'https://api.dicebear.com/8.x/avataaars/svg?seed=Mia&backgroundColor=c0aede',
-            'https://api.dicebear.com/8.x/avataaars/svg?seed=Sam&backgroundColor=b6e3f4',
-            'https://api.dicebear.com/8.x/avataaars/svg?seed=Zoe&backgroundColor=ffdfbf',
-            'https://api.dicebear.com/8.x/avataaars/svg?seed=Max&backgroundColor=d1d4f9',
-            'https://api.dicebear.com/8.x/avataaars/svg?seed=Lia&backgroundColor=c0aede',
-            'https://api.dicebear.com/8.x/avataaars/svg?seed=Eli&backgroundColor=ffdfbf',
-            'https://api.dicebear.com/8.x/avataaars/svg?seed=Ava&backgroundColor=b6e3f4',
-            'https://api.dicebear.com/8.x/avataaars/svg?seed=Ian&backgroundColor=d1d4f9',
-            'https://api.dicebear.com/8.x/avataaars/svg?seed=Joy&backgroundColor=c0aede',
-            'https://api.dicebear.com/8.x/avataaars/svg?seed=Ray&backgroundColor=ffdfbf',
-            'https://api.dicebear.com/8.x/avataaars/svg?seed=Sue&backgroundColor=b6e3f4',
-            'https://api.dicebear.com/8.x/avataaars/svg?seed=Tom&backgroundColor=d1d4f9',
-            'https://api.dicebear.com/8.x/avataaars/svg?seed=Ann&backgroundColor=c0aede'
-        ];
-
-        window.currentUser = null;
-        let currentUserData = { avatar: AVATARS[0], name: 'Netflix User' }; 
-        let watchlist = [];
-        let continueWatching = {}; 
-        let currentMedia = null; 
-        let searchTimeout = null;
-        let isFetching = false;
-        let authMode = 'login'; 
-        let selectedSignupAvatar = AVATARS[0];
-        let selectedSettingsAvatar = null;
-
-        // Escape helper for titles with quotes (like Grey's Anatomy)
-        window.escapeStr = (str) => {
-            if(!str) return '';
-            return str.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-        };
-
-        // Firebase subscriptions
-        let unsubWatchlist = null;
-        let unsubProgress = null;
-        let unsubUser = null;
-
-        // Endpoints
-        const requests = {
-            trending: `/trending/all/week`,
-            netflixOriginals: `/discover/tv?with_networks=213`,
-            topRated: `/movie/top_rated`,
-            actionMovies: `/discover/movie?with_genres=28`,
-            comedyMovies: `/discover/movie?with_genres=35`,
-            horrorMovies: `/discover/movie?with_genres=27`,
-        };
-
-        // --- AUTHENTICATION LOGIC ---
-
-        function renderAvatarOptions(containerId, selectedAvatar, clickHandlerName) {
-            const container = document.getElementById(containerId);
-            container.innerHTML = AVATARS.map((url, index) => `
-                <img src="${url}" 
-                     class="avatar-option ${url === selectedAvatar ? 'selected' : ''}" 
-                     onclick="${clickHandlerName}('${url}')" 
-                     alt="Avatar ${index + 1}">
-            `).join('');
+        const safe = async (t, e, s) => { try { await buildRow(t, e, s); } catch(x) { console.error("[Duoflix] Row error:", t, x); } };
+        try {
+            await Promise.all([
+                safe('Top 10 in India Today', EP.trending, 'trending'),
+                safe('Duoflix Originals', EP.originals, 'tv-shows'),
+                safe('Top Rated', EP.topRated, 'movies'),
+                safe('Action & Adventure', EP.action),
+                safe('Comedies', EP.comedy),
+                safe('Horror & Thriller', EP.horror),
+            ]);
+            buildCWRow();
+            await buildHero();
+            console.log("[Duoflix] App initialized successfully!");
+        } catch(e) {
+            console.error("[Duoflix] Init error:", e);
         }
+        fetching = false;
+    }
+    window.initApp = initApp;
 
-        window.selectSignupAvatar = (url) => {
-            selectedSignupAvatar = url;
-            renderAvatarOptions('avatar-list', selectedSignupAvatar, 'selectSignupAvatar');
-        };
-
-        window.selectSettingsAvatar = (url) => {
-            selectedSettingsAvatar = url;
-            renderAvatarOptions('settings-avatar-list', selectedSettingsAvatar, 'selectSettingsAvatar');
-            document.getElementById('settings-current-avatar').src = url;
-        };
-
-        onAuthStateChanged(auth, (user) => {
-            const loader = document.getElementById('global-loader');
-            if (loader) loader.classList.add('hidden');
-
-            if (user) {
-                window.currentUser = user;
-                document.getElementById('auth-screen').classList.add('hidden');
-                document.getElementById('user-email-display').innerText = user.email;
-                document.getElementById('settings-email').innerText = user.email;
-                
-                subscribeToUserData();
-
-                // Directly initialize app since API key is hardcoded now
-                document.getElementById('main-view').classList.remove('hidden');
-                window.initApp();
-
-            } else {
-                window.currentUser = null;
-                cleanupData();
-                document.getElementById('auth-screen').classList.remove('hidden');
-                document.getElementById('main-view').classList.add('hidden');
-                document.getElementById('watchlist-view').classList.add('hidden');
-                document.getElementById('search-results-view').classList.add('hidden');
-                renderAvatarOptions('avatar-list', selectedSignupAvatar, 'selectSignupAvatar');
-            }
-        });
-
-        window.toggleAuthMode = () => {
-            authMode = authMode === 'login' ? 'signup' : 'login';
-            document.getElementById('auth-title').innerText = authMode === 'login' ? 'Sign In' : 'Sign Up';
-            document.getElementById('auth-btn').innerText = authMode === 'login' ? 'Sign In' : 'Sign Up';
-            document.getElementById('auth-toggle-text').innerText = authMode === 'login' ? 'New to Duoflix?' : 'Already have an account?';
-            document.getElementById('auth-toggle-btn').innerText = authMode === 'login' ? 'Sign up now.' : 'Sign in.';
-            document.getElementById('auth-error-msg').classList.add('hidden');
-            
-            const avatarContainer = document.getElementById('avatar-selection-container');
-            if (authMode === 'signup') {
-                avatarContainer.classList.remove('hidden');
-            } else {
-                avatarContainer.classList.add('hidden');
-            }
-        };
-
-        window.handleAuth = async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('auth-email').value;
-            const password = document.getElementById('auth-password').value;
-            const errorMsg = document.getElementById('auth-error-msg');
-            const btn = document.getElementById('auth-btn');
-            
-            btn.disabled = true;
-            btn.innerText = "Please wait...";
-            
-            try {
-                if (authMode === 'login') {
-                    await signInWithEmailAndPassword(auth, email, password);
-                } else {
-                    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                    await setDoc(doc(db, 'artifacts', APP_ID, 'users', userCredential.user.uid, 'profile', 'info'), {
-                        avatar: selectedSignupAvatar,
-                        name: email.split('@')[0],
-                        createdAt: Date.now()
-                    });
-                }
-                errorMsg.classList.add('hidden');
-            } catch (error) {
-                let friendlyMsg = "An error occurred. Please try again.";
-                
-                if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
-                    friendlyMsg = "Invalid email or password. Please try again.";
-                } else if (error.code === 'auth/email-already-in-use') {
-                    friendlyMsg = "An account already exists with this email. Please sign in.";
-                } else if (error.code === 'auth/weak-password') {
-                    friendlyMsg = "Password should be at least 6 characters long.";
-                } else if (error.code === 'auth/invalid-email') {
-                    friendlyMsg = "Please enter a valid email address.";
-                } else if (error.code === 'auth/too-many-requests') {
-                    friendlyMsg = "Too many failed attempts. Please try again later.";
-                } else {
-                    friendlyMsg = error.message.replace('Firebase: ', '');
-                }
-                
-                errorMsg.innerText = friendlyMsg;
-                errorMsg.classList.remove('hidden');
-            } finally {
-                btn.disabled = false;
-                btn.innerText = authMode === 'login' ? 'Sign In' : 'Sign Up';
-            }
-        };
-
-        window.logoutUser = async () => {
-            await signOut(auth);
-        };
-
-        // --- ACCOUNT SETTINGS ---
-        window.openAccountSettings = () => {
-            const modal = document.getElementById('account-settings-modal');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-            selectedSettingsAvatar = currentUserData.avatar;
-            document.getElementById('settings-current-avatar').src = selectedSettingsAvatar;
-            document.getElementById('settings-name').value = currentUserData.name || '';
-            renderAvatarOptions('settings-avatar-list', selectedSettingsAvatar, 'selectSettingsAvatar');
-        };
-
-        window.closeAccountSettings = () => {
-            const modal = document.getElementById('account-settings-modal');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-        };
-
-        window.saveAccountSettings = async () => {
-             if (!window.currentUser) return;
-             
-             const btn = document.getElementById('save-settings-btn');
-             const originalText = btn.innerText;
-             btn.innerText = "Saving...";
-             btn.disabled = true;
-             
-             const newName = document.getElementById('settings-name').value.trim();
-             
-             try {
-                 await setDoc(doc(db, 'artifacts', APP_ID, 'users', window.currentUser.uid, 'profile', 'info'), {
-                     avatar: selectedSettingsAvatar,
-                     name: newName || 'User',
-                     updatedAt: Date.now()
-                 }, { merge: true });
-                 window.closeAccountSettings();
-             } catch(e) {
-                 console.error("Error saving profile", e);
-             } finally {
-                 btn.innerText = originalText;
-                 btn.disabled = false;
-             }
-        };
-
-        // --- FIRESTORE SYNC ---
-
-        function subscribeToUserData() {
-            if (!window.currentUser) return;
-            const uid = window.currentUser.uid;
-
-            // Profile Listener
-            const profileRef = doc(db, 'artifacts', APP_ID, 'users', uid, 'profile', 'info');
-            unsubUser = onSnapshot(profileRef, (doc) => {
-                if (doc.exists()) {
-                    currentUserData.avatar = doc.data().avatar || AVATARS[0];
-                    currentUserData.name = doc.data().name || 'Netflix User';
-                } else {
-                    currentUserData.avatar = AVATARS[0]; 
-                    currentUserData.name = 'Netflix User';
-                }
-                document.getElementById('nav-profile-img').src = currentUserData.avatar;
-                document.getElementById('dropdown-profile-img').src = currentUserData.avatar;
-                
-                const dropdownName = document.getElementById('dropdown-user-name');
-                if(dropdownName) dropdownName.innerText = currentUserData.name;
-                
-            }, (error) => console.error("Profile sync error:", error));
-
-            // Watchlist Listener
-            const watchRef = collection(db, 'artifacts', APP_ID, 'users', uid, 'watchlist');
-            unsubWatchlist = onSnapshot(watchRef, (snapshot) => {
-                watchlist = [];
-                snapshot.forEach(doc => watchlist.push(doc.data()));
-                
-                if(currentMedia) {
-                    const isWatchlisted = watchlist.some(i => i.id === currentMedia.id && i.type === currentMedia.type);
-                    updateModalWatchlistUI(isWatchlisted);
-                }
-                
-                if (!document.getElementById('watchlist-view').classList.contains('hidden')) {
-                    window.showWatchlist();
-                }
-            }, (error) => console.error("Watchlist sync error:", error));
-
-            // Progress Listener
-            const progRef = collection(db, 'artifacts', APP_ID, 'users', uid, 'progress');
-            unsubProgress = onSnapshot(progRef, (snapshot) => {
-                continueWatching = {};
-                snapshot.forEach(doc => { continueWatching[doc.id] = doc.data(); });
-                window.buildContinueWatchingRow();
-            }, (error) => console.error("Progress sync error:", error));
-        }
-
-        function cleanupData() {
-            if (unsubWatchlist) unsubWatchlist();
-            if (unsubProgress) unsubProgress();
-            if (unsubUser) unsubUser();
-            watchlist = [];
-            continueWatching = {};
-            document.getElementById('rows-container').innerHTML = '';
-        }
-
-        // --- API INTEGRATION ---
-
-        async function fetchTMDB(endpoint) {
-            const separator = endpoint.includes('?') ? '&' : '?';
-            const url = `${BASE_URL}${endpoint}${separator}api_key=${API_KEY}`;
-            const res = await fetch(url);
-            if (!res.ok) throw new Error(`API Error: ${res.status}`);
-            return await res.json();
-        }
-
-        window.initApp = async () => {
-            if(isFetching) return;
-            isFetching = true;
-            try {
-                const safeFetch = async (title, endpoint, sectionId) => {
-                    try { await fetchAndBuildRow(title, endpoint, sectionId); } 
-                    catch(e) { console.error(`Failed row ${title}`); }
-                };
-
-                await Promise.all([
-                    safeFetch('Trending Now', requests.trending, 'trending'),
-                    safeFetch('Duoflix Originals', requests.netflixOriginals, 'tv-shows'),
-                    safeFetch('Top Rated', requests.topRated, 'movies'),
-                    safeFetch('Action & Adventure', requests.actionMovies),
-                    safeFetch('Comedies', requests.comedyMovies),
-                    safeFetch('Horror', requests.horrorMovies)
-                ]);
-                
-                window.buildContinueWatchingRow();
-                await buildHero();
-            } catch (error) {
-                console.error("Critical app init failure:", error);
-            }
-            isFetching = false;
-        };
-
-        // --- UI BUILDERS ---
-
-        async function buildHero() {
-            const data = await fetchTMDB(requests.trending);
-            const validMovies = data.results.filter(m => m.backdrop_path && m.overview);
-            const randomMovie = validMovies[Math.floor(Math.random() * validMovies.length)];
-            
-            if(!randomMovie) return;
-
-            const heroBg = document.getElementById('hero-bg-image');
-            const title = document.getElementById('hero-title');
-            const overview = document.getElementById('hero-overview');
-            const playBtn = document.getElementById('hero-play-btn');
-            const infoBtn = document.getElementById('hero-info-btn');
-
-            const imgUrl = `${IMG_URL_ORIGINAL}${randomMovie.backdrop_path}`;
+    // ===== HERO =====
+    async function buildHero() {
+        try {
+            const data = await fetchT(EP.trending);
+            const valid = data.results.filter(m => m.backdrop_path && m.overview);
+            if (!valid.length) return;
+            const mv = valid[Math.floor(Math.random() * valid.length)];
+            const iu = IMGO + mv.backdrop_path;
             const img = new Image();
             img.onload = () => {
-                heroBg.style.backgroundImage = `url('${imgUrl}')`;
-                document.getElementById('hero-banner').classList.remove('skeleton');
+                document.getElementById('hero-bg').style.backgroundImage = "url('" + iu + "')";
+                document.getElementById('hero').classList.remove('skel');
             };
-            img.src = imgUrl;
-            
-            const titleText = randomMovie.name || randomMovie.title || randomMovie.original_name;
-            title.innerText = titleText;
-            overview.innerText = truncate(randomMovie.overview, 180);
+            img.onerror = () => { document.getElementById('hero').classList.remove('skel'); };
+            img.src = iu;
+            const tt = mv.name || mv.title || '';
+            document.getElementById('hero-title').innerText = tt;
+            document.getElementById('hero-desc').innerText = trunc(mv.overview, 180);
+            const badge = document.getElementById('hero-badge');
+            if (mv.media_type === 'tv') { badge.classList.remove('hidden'); badge.classList.add('flex'); } else { badge.classList.add('hidden'); badge.classList.remove('flex'); }
+            const tp = mv.media_type || 'movie';
+            document.getElementById('hero-play').onclick = () => playM({ id: mv.id, type: tp, title: tt, backdrop: iu });
+            document.getElementById('hero-info').onclick = () => openDet(mv.id, tp);
+        } catch(e) { console.error("[Duoflix] Hero error:", e); }
+    }
 
-            const type = randomMovie.media_type || 'movie';
-            
-            playBtn.onclick = () => window.playMedia({
-                id: randomMovie.id, 
-                type: type, 
-                title: titleText, 
-                backdrop: imgUrl
-            });
-            infoBtn.onclick = () => window.openDetailsModal(randomMovie.id, type);
-        }
+    // ===== ROWS =====
+    function escA(s) { if (!s) return ''; return s.replace(/&/g,'&amp;').replace(/'/g,'&#39;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+    window.escA = escA;
 
-        async function fetchAndBuildRow(title, endpoint, sectionId = null) {
-            const container = document.getElementById('rows-container');
-            const rowId = `row-${Math.random().toString(36).substr(2, 9)}`;
-            
-            let rowHTML = `
-                <div class="row relative group/row" ${sectionId ? `id="${sectionId}"` : ''}>
-                    <h2 class="text-lg md:text-xl font-bold mb-2 ml-4 md:ml-0 text-gray-100 drop-shadow-md tracking-wide">${title}</h2>
-                    <div class="relative">
-                        <button class="absolute left-0 top-0 bottom-0 w-12 md:w-16 bg-gradient-to-r from-[#141414] via-[#141414]/90 to-transparent z-20 text-white opacity-0 group-hover/row:opacity-100 transition-all duration-300 flex items-center justify-center hover:w-20 hidden md:flex" onclick="scrollRow('${rowId}', -400)">
-                            <i class="fas fa-chevron-left text-3xl drop-shadow-[0_0_10px_rgba(0,0,0,1)] hover:scale-125 transition-transform"></i>
-                        </button>
-                        
-                        <div id="${rowId}" class="row-posters pl-4 md:pl-0">
-                            ${Array(8).fill('<div class="skeleton row-poster"></div>').join('')}
-                        </div>
-                        
-                        <button class="absolute right-0 top-0 bottom-0 w-12 md:w-16 bg-gradient-to-l from-[#141414] via-[#141414]/90 to-transparent z-20 text-white opacity-0 group-hover/row:opacity-100 transition-all duration-300 flex items-center justify-center hover:w-20 hidden md:flex" onclick="scrollRow('${rowId}', 400)">
-                            <i class="fas fa-chevron-right text-3xl drop-shadow-[0_0_10px_rgba(0,0,0,1)] hover:scale-125 transition-transform"></i>
-                        </button>
-                    </div>
-                </div>
-            `;
-            container.insertAdjacentHTML('beforeend', rowHTML);
+    async function buildRow(title, endpoint, sectionId) {
+        const box = document.getElementById('rows-box');
+        const rid = 'r-' + Math.random().toString(36).substr(2, 9);
+        const isT10 = title.includes('Top 10');
 
-            const data = await fetchTMDB(endpoint);
-            const rowElement = document.getElementById(rowId);
-            
-            rowElement.innerHTML = data.results.map(movie => {
-                const imgPath = movie.backdrop_path || movie.poster_path; 
-                if (!imgPath) return ''; 
-                const type = movie.media_type || (endpoint.includes('tv') ? 'tv' : 'movie');
-                const titleText = movie.name || movie.title || '';
-                
-                return `
-                <div class="row-poster group relative overflow-hidden shadow-lg" onclick="openDetailsModal(${movie.id}, '${type}')">
-                    <img src="${IMG_URL}${imgPath}" alt="${window.escapeStr(titleText)}" class="w-full h-full object-cover rounded-md" loading="lazy">
-                    <div class="poster-title-overlay">
-                        <p class="poster-title-text">${titleText}</p>
-                    </div>
-                </div>`;
+        let html = '<div class="row relative group/row" ' + (sectionId ? 'id="' + sectionId + '"' : '') + '>';
+        html += '<h2 class="text-lg md:text-xl font-bold mb-3 ml-4 md:ml-0 text-gray-100 tracking-wide flex items-center gap-3">';
+        if (isT10) html += '<span class="bg-netflix-red px-2 py-0.5 rounded text-xs font-black tracking-wider">TOP 10</span>';
+        html += title + '</h2>';
+        html += '<div class="relative">';
+        html += '<button class="absolute left-0 top-0 bottom-0 w-12 md:w-16 bg-gradient-to-r from-[#141414] to-transparent z-20 text-white opacity-0 group-hover/row:opacity-100 transition-all duration-300 flex items-center justify-center hover:w-20 hidden md:flex" onclick="scrollR(\'' + rid + '\',-400)"><i class="fas fa-chevron-left text-2xl hover:scale-125 transition-transform"></i></button>';
+        html += '<div id="' + rid + '" class="row-scroll pl-4 md:pl-0">';
+        for (let i = 0; i < 8; i++) html += '<div class="skel rposter"></div>';
+        html += '</div>';
+        html += '<button class="absolute right-0 top-0 bottom-0 w-12 md:w-16 bg-gradient-to-l from-[#141414] to-transparent z-20 text-white opacity-0 group-hover/row:opacity-100 transition-all duration-300 flex items-center justify-center hover:w-20 hidden md:flex" onclick="scrollR(\'' + rid + '\',400)"><i class="fas fa-chevron-right text-2xl hover:scale-125 transition-transform"></i></button>';
+        html += '</div></div>';
+        box.insertAdjacentHTML('beforeend', html);
+
+        const data = await fetchT(endpoint);
+        const el = document.getElementById(rid);
+        if (!el) return;
+
+        let posters = '';
+        data.results.forEach((mv, idx) => {
+            const ip = mv.backdrop_path || mv.poster_path;
+            if (!ip) return;
+            const tp = mv.media_type || (endpoint.includes('tv') ? 'tv' : 'movie');
+            const tt = escA(mv.name || mv.title || '');
+            const showBadge = isT10 && idx < 10;
+            posters += '<div class="rposter group relative" onclick="openDet(' + mv.id + ',\'' + tp + '\')">';
+            if (showBadge) posters += '<div class="t10num">' + (idx + 1) + '</div>';
+            posters += '<img src="' + IMG + ip + '" alt="' + tt + '" class="w-full h-full object-cover rounded-lg" loading="lazy">';
+            posters += '<div class="ptitle-over"><p class="ptitle-txt">' + tt + '</p></div>';
+            if (showBadge) posters += '<div class="t10badge">TOP 10</div>';
+            posters += '</div>';
+        });
+        el.innerHTML = posters;
+    }
+
+    function buildCWRow() {
+        const items = Object.values(cw).sort((a, b) => b.timestamp - a.timestamp);
+        const ex = document.getElementById('cw-wrap');
+        if (ex) ex.remove();
+        if (!items.length) return;
+        const box = document.getElementById('rows-box');
+        const rid = 'r-cw';
+        let html = '<div class="row relative group/row" id="cw-wrap">';
+        html += '<h2 class="text-lg md:text-xl font-bold mb-3 ml-4 md:ml-0 text-white tracking-wide flex items-center gap-3"><i class="fas fa-play-circle text-netflix-red"></i>Continue Watching</h2>';
+        html += '<div class="relative">';
+        html += '<button class="absolute left-0 top-0 bottom-0 w-12 md:w-16 bg-gradient-to-r from-[#141414] to-transparent z-20 text-white opacity-0 group-hover/row:opacity-100 transition-all duration-300 flex items-center justify-center hidden md:flex" onclick="scrollR(\'' + rid + '\',-400)"><i class="fas fa-chevron-left text-2xl hover:scale-125 transition-transform"></i></button>';
+        html += '<div id="' + rid + '" class="row-scroll pl-4 md:pl-0">';
+
+        items.forEach(item => {
+            const tt = escA(item.title || '');
+            const bd = escA(item.backdrop || '');
+            const pct = item.duration ? Math.round((item.progress / item.duration) * 100) : 0;
+            const sn = item.season ? item.season : 'null';
+            const ep = item.episode ? item.episode : 'null';
+            html += '<div class="rposter group relative" onclick="playM({id:' + item.id + ',type:\'' + item.type + '\',title:\'' + tt + '\',backdrop:\'' + bd + '\',season:' + sn + ',episode:' + ep + ',startTime:' + (item.progress || 0) + '})">';
+            html += '<img src="' + (item.backdrop || FALL) + '" class="w-full h-full object-cover rounded-lg opacity-80 group-hover:opacity-100 transition-opacity" loading="lazy">';
+            html += '<div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40 z-10"><div class="bg-black/70 rounded-full w-14 h-14 flex items-center justify-center border-2 border-white/80 shadow-xl"><i class="fas fa-play text-white ml-1 text-xl"></i></div></div>';
+            html += '<div class="ptitle-over pb-3"><p class="ptitle-txt">' + tt + '</p></div>';
+            html += '<div class="prog-wrap"><div class="prog-bar" style="width:' + pct + '%"></div></div>';
+            if (item.type === 'tv' && item.season && item.episode) html += '<span class="absolute top-2 right-2 bg-black/80 backdrop-blur px-2 py-0.5 text-[10px] rounded font-bold border border-gray-700/50 text-white z-10">S' + item.season + ' E' + item.episode + '</span>';
+            html += '</div>';
+        });
+
+        html += '</div>';
+        html += '<button class="absolute right-0 top-0 bottom-0 w-12 md:w-16 bg-gradient-to-l from-[#141414] to-transparent z-20 text-white opacity-0 group-hover/row:opacity-100 transition-all duration-300 flex items-center justify-center hidden md:flex" onclick="scrollR(\'' + rid + '\',400)"><i class="fas fa-chevron-right text-2xl hover:scale-125 transition-transform"></i></button>';
+        html += '</div></div>';
+        box.insertAdjacentHTML('afterbegin', html);
+    }
+    window.buildCWRow = buildCWRow;
+
+    // ===== UTILS =====
+    window.scrollR = (id, off) => { const el = document.getElementById(id); if (el) el.scrollBy({ left: off, behavior: 'smooth' }); };
+    function trunc(s, n) { return s && s.length > n ? s.substr(0, n-1) + '...' : s || ''; }
+
+    window.goHome = () => { hideSrch(); hideWL(); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+    window.goSection = (id) => { hideSrch(); hideWL(); const el = document.getElementById(id); if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 80, behavior: 'smooth' }); };
+
+    window.addEventListener('scroll', () => {
+        const n = document.getElementById('navbar');
+        window.scrollY > 30 ? (n.classList.remove('nav-trans'), n.classList.add('nav-black')) : (n.classList.add('nav-trans'), n.classList.remove('nav-black'));
+    });
+
+    // ===== SEARCH =====
+    let srchOpen = false;
+    window.togSearch = () => {
+        if (!srchOpen) {
+            srchOpen = true;
+            document.getElementById('srch-box').classList.add('srch-exp');
+            document.getElementById('srch-input').style.width = '180px';
+            document.getElementById('srch-icon').style.display = 'none';
+            setTimeout(() => document.getElementById('srch-input').focus(), 300);
+        } else { hideSrch(); }
+    };
+    function hideSrch() {
+        srchOpen = false;
+        document.getElementById('srch-box').classList.remove('srch-exp');
+        document.getElementById('srch-input').style.width = '0';
+        document.getElementById('srch-input').value = '';
+        document.getElementById('srch-icon').style.display = '';
+        document.getElementById('srch-view').classList.add('hidden');
+        if (curUser) { document.getElementById('main-view').classList.remove('hidden'); document.getElementById('main-view').style.display = ''; }
+    }
+    window.hideSrch = hideSrch;
+
+    window.doSearch = (q) => { clearTimeout(srchTO); srchTO = setTimeout(() => execSearch(q), 500); };
+
+    async function execSearch(q) {
+        if (!q || q.trim().length < 2) { hideSrch(); return; }
+        document.getElementById('main-view').classList.add('hidden');
+        document.getElementById('main-view').style.display = 'none';
+        document.getElementById('wl-view').classList.add('hidden');
+        document.getElementById('srch-view').classList.remove('hidden');
+        document.getElementById('srch-view').style.display = '';
+        document.getElementById('srch-q').innerText = q;
+        const g = document.getElementById('srch-grid');
+        g.innerHTML = Array(12).fill('<div class="skel aspect-video rounded-lg"></div>').join('');
+        try {
+            const d = await fetchT('/search/multi?query=' + encodeURIComponent(q));
+            const r = d.results.filter(i => (i.backdrop_path || i.poster_path) && (i.media_type === 'movie' || i.media_type === 'tv'));
+            if (!r.length) { g.innerHTML = '<p class="col-span-full text-gray-500 text-center py-20 text-xl">No results found.</p>'; return; }
+            g.innerHTML = r.map(i => {
+                const ip = i.backdrop_path || i.poster_path;
+                const tt = escA(i.title || i.name || '');
+                return '<div class="relative group cursor-pointer transition-all duration-300 hover:scale-105 hover:z-30 rounded-lg overflow-hidden shadow-lg aspect-video" onclick="openDet(' + i.id + ',\'' + i.media_type + '\')"><img src="' + IMG + ip + '" class="w-full h-full object-cover"><div class="ptitle-over"><p class="ptitle-txt">' + tt + '</p></div></div>';
             }).join('');
+        } catch(e) { g.innerHTML = '<p class="col-span-full text-red-500 text-center py-10">Network error.</p>'; }
+    }
+
+    // ===== WATCHLIST =====
+    window.showWatchlist = () => {
+        hideSrch();
+        document.getElementById('main-view').classList.add('hidden');
+        document.getElementById('main-view').style.display = 'none';
+        document.getElementById('wl-view').classList.remove('hidden');
+        document.getElementById('wl-view').style.display = '';
+        const g = document.getElementById('wl-grid');
+        if (!wl.length) {
+            g.innerHTML = '<div class="col-span-full flex flex-col items-center py-32"><i class="fas fa-bookmark text-7xl text-gray-800 mb-6"></i><p class="text-gray-400 text-2xl font-medium">Your list is empty.</p><button onclick="goHome()" class="mt-8 bg-white text-black px-8 py-3 rounded-lg font-bold hover:bg-gray-100 transition shadow-xl">Browse</button></div>';
+            return;
         }
+        g.innerHTML = wl.map(i => {
+            const tt = escA(i.title || '');
+            return '<div class="relative group cursor-pointer transition-all duration-300 hover:scale-105 hover:z-30 rounded-lg overflow-hidden shadow-lg aspect-video" onclick="openDet(' + i.id + ',\'' + i.type + '\')"><img src="' + i.poster + '" class="w-full h-full object-cover"><div class="ptitle-over"><p class="ptitle-txt">' + tt + '</p></div></div>';
+        }).join('');
+    };
+    function hideWL() { document.getElementById('wl-view').classList.add('hidden'); document.getElementById('wl-view').style.display = 'none'; if (curUser) { document.getElementById('main-view').classList.remove('hidden'); document.getElementById('main-view').style.display = ''; } }
+    window.hideWL = hideWL;
 
-        window.buildContinueWatchingRow = () => {
-            const items = Object.values(continueWatching).sort((a, b) => b.timestamp - a.timestamp);
-            const existing = document.getElementById('continue-watching-wrapper');
-            if (items.length === 0) {
-                if(existing) existing.remove();
-                return;
-            }
-
-            const container = document.getElementById('rows-container');
-            const rowId = 'row-continue-watching';
-            
-            let rowHTML = `
-                <div class="row relative group/row" id="continue-watching-wrapper">
-                    <h2 class="text-lg md:text-xl font-bold mb-2 ml-4 md:ml-0 text-white drop-shadow-md tracking-wide">Continue Watching</h2>
-                    <div class="relative">
-                        <button class="absolute left-0 top-0 bottom-0 w-12 md:w-16 bg-gradient-to-r from-[#141414] via-[#141414]/90 to-transparent z-20 text-white opacity-0 group-hover/row:opacity-100 transition-all duration-300 flex items-center justify-center hover:w-20 hidden md:flex" onclick="scrollRow('${rowId}', -400)">
-                            <i class="fas fa-chevron-left text-3xl hover:scale-125 transition-transform"></i>
-                        </button>
-                        
-                        <div id="${rowId}" class="row-posters pl-4 md:pl-0">
-                            ${items.map(item => `
-                                <div class="row-poster group relative overflow-hidden" onclick="window.playMedia({id: ${item.id}, type: '${item.type}', title: '${window.escapeStr(item.title)}', backdrop: '${item.backdrop}', season: ${item.season || 'null'}, episode: ${item.episode || 'null'}, startTime: ${item.progress}})">
-                                    <img src="${item.backdrop && item.backdrop !== 'null' ? item.backdrop : FALLBACK_IMG}" class="w-full h-full object-cover rounded-md opacity-80 group-hover:opacity-100 transition-opacity duration-300" loading="lazy">
-                                    <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/40 backdrop-blur-[1px] z-10">
-                                        <div class="bg-black/60 rounded-full w-14 h-14 flex items-center justify-center border-2 border-white shadow-xl hover:scale-110 transition-transform">
-                                            <i class="fas fa-play text-white ml-1 text-xl"></i>
-                                        </div>
-                                    </div>
-                                    <div class="poster-title-overlay pb-3">
-                                        <p class="poster-title-text">${item.title}</p>
-                                    </div>
-                                    <div class="progress-container"><div class="progress-bar shadow-[0_0_10px_#E50914]" style="width: ${(item.progress / (item.duration || 1)) * 100}%"></div></div>
-                                    ${item.type === 'tv' && item.season && item.episode ? `<span class="absolute top-2 right-2 bg-black/80 backdrop-blur-md px-2 py-1 text-xs rounded font-bold shadow-md border border-gray-700 text-white z-10">S${item.season} E${item.episode}</span>` : ''}
-                                </div>
-                            `).join('')}
-                        </div>
-                        
-                        <button class="absolute right-0 top-0 bottom-0 w-12 md:w-16 bg-gradient-to-l from-[#141414] via-[#141414]/90 to-transparent z-20 text-white opacity-0 group-hover/row:opacity-100 transition-all duration-300 flex items-center justify-center hover:w-20 hidden md:flex" onclick="scrollRow('${rowId}', 400)">
-                            <i class="fas fa-chevron-right text-3xl hover:scale-125 transition-transform"></i>
-                        </button>
-                    </div>
-                </div>
-            `;
-            
-            if(existing) existing.remove();
-            container.insertAdjacentHTML('afterbegin', rowHTML);
-        };
-
-        // --- UTILS & INTERACTIONS ---
-
-        window.scrollRow = (rowId, offset) => { document.getElementById(rowId).scrollBy({ left: offset, behavior: 'smooth' }); };
-        function truncate(str, n) { return str?.length > n ? str.substr(0, n - 1) + "..." : str; }
-        
-        window.scrollToSection = (id) => {
-            window.hideSearch();
-            window.hideWatchlist();
-            const el = document.getElementById(id);
-            if(el) window.scrollTo({top: el.getBoundingClientRect().top + window.scrollY - 100, behavior: 'smooth'});
-        };
-
-        window.renderHome = () => {
-            window.hideSearch();
-            window.hideWatchlist();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        };
-
-        // Glassmorphism Scroll
-        window.addEventListener('scroll', () => {
-            const nav = document.getElementById('navbar');
-            if (window.scrollY > 50) { nav.classList.remove('nav-transparent'); nav.classList.add('nav-black'); } 
-            else { nav.classList.add('nav-transparent'); nav.classList.remove('nav-black'); }
-        });
-
-        // Search logic
-        document.getElementById('search-input').addEventListener('input', (e) => {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(() => handleSearch(e.target.value), 500);
-        });
-
-        window.toggleSearch = () => {
-            const box = document.getElementById('search-box');
-            if (box.classList.contains('hidden')) {
-                box.classList.remove('hidden'); document.getElementById('search-icon').classList.add('hidden');
-                document.getElementById('search-input').focus();
-            } else { window.hideSearch(); }
-        };
-
-        window.hideSearch = () => {
-            document.getElementById('search-box').classList.add('hidden');
-            document.getElementById('search-icon').classList.remove('hidden');
-            document.getElementById('search-input').value = '';
-            document.getElementById('search-results-view').classList.add('hidden');
-            if(window.currentUser) document.getElementById('main-view').classList.remove('hidden');
-        };
-
-        async function handleSearch(query) {
-            if (!query || query.trim().length < 2) { window.hideSearch(); return; }
-            document.getElementById('main-view').classList.add('hidden');
-            document.getElementById('watchlist-view').classList.add('hidden');
-            document.getElementById('search-results-view').classList.remove('hidden');
-            document.getElementById('search-query-display').innerText = query;
-
-            const grid = document.getElementById('search-grid');
-            grid.innerHTML = Array(12).fill('<div class="skeleton aspect-video rounded-md"></div>').join('');
-
-            try {
-                const data = await fetchTMDB(`/search/multi?query=${encodeURIComponent(query)}`);
-                const results = data.results.filter(i => (i.backdrop_path || i.poster_path) && (i.media_type === 'movie' || i.media_type === 'tv'));
-                
-                if (results.length === 0) { grid.innerHTML = '<p class="col-span-full text-gray-500 text-center py-20 text-xl">No matching titles found.</p>'; return; }
-
-                grid.innerHTML = results.map(item => {
-                    const imgPath = item.backdrop_path || item.poster_path;
-                    return `
-                    <div class="relative group cursor-pointer transition-transform duration-300 hover:scale-105 hover:z-30 rounded-md overflow-hidden shadow-lg aspect-video" onclick="openDetailsModal(${item.id}, '${item.media_type}')">
-                        <img src="${IMG_URL}${imgPath}" class="w-full h-full object-cover">
-                        <div class="poster-title-overlay"><p class="poster-title-text">${item.title || item.name}</p></div>
-                    </div>
-                `}).join('');
-            } catch(e) { grid.innerHTML = '<p class="col-span-full text-red-500 text-center py-10">Network error.</p>'; }
-        }
-
-        // --- WATCHLIST LOGIC ---
-        
-        window.showWatchlist = () => {
-            window.hideSearch();
-            document.getElementById('main-view').classList.add('hidden');
-            document.getElementById('watchlist-view').classList.remove('hidden');
-            
-            const grid = document.getElementById('watchlist-grid');
-            if (watchlist.length === 0) {
-                grid.innerHTML = '<div class="col-span-full flex flex-col items-center justify-center py-32"><i class="fas fa-bookmark text-7xl text-gray-800 mb-6 drop-shadow-md"></i><p class="text-gray-400 text-2xl font-medium">Your watchlist is empty.</p><button onclick="renderHome()" class="mt-8 bg-white text-black px-6 py-2 rounded font-bold hover:bg-gray-200 transition shadow-lg">Explore Titles</button></div>';
-                return;
-            }
-
-            grid.innerHTML = watchlist.map(item => `
-                <div class="relative group cursor-pointer transition-transform duration-300 hover:scale-105 hover:z-30 rounded-md overflow-hidden shadow-lg aspect-video" onclick="openDetailsModal(${item.id}, '${item.type}')">
-                    <img src="${item.poster}" class="w-full h-full object-cover">
-                    <div class="poster-title-overlay"><p class="poster-title-text">${item.title}</p></div>
-                </div>
-            `).join('');
-        };
-
-        window.hideWatchlist = () => {
-            document.getElementById('watchlist-view').classList.add('hidden');
-            if(window.currentUser) document.getElementById('main-view').classList.remove('hidden');
-        };
-
-        window.toggleWatchlist = async (media) => {
-            if (!window.currentUser) return;
-            const isWatchlisted = watchlist.some(i => i.id === media.id && i.type === media.type);
-            const docRef = doc(db, 'artifacts', APP_ID, 'users', window.currentUser.uid, 'watchlist', media.id.toString());
-            
-            // Optimistic UI Update
-            updateModalWatchlistUI(!isWatchlisted);
-
-            try {
-                if (isWatchlisted) {
-                    await deleteDoc(docRef);
-                } else {
-                    const newItem = {
-                        id: media.id,
-                        type: media.type,
-                        title: media.title || media.name,
-                        poster: media.backdrop_path ? `${IMG_URL}${media.backdrop_path}` : FALLBACK_IMG,
-                        timestamp: Date.now()
-                    };
-                    await setDoc(docRef, newItem);
-                }
-            } catch(e) { 
-                console.error("Error updating watchlist:", e); 
-                updateModalWatchlistUI(isWatchlisted); // Rollback on error
-            }
-        };
-
-        function updateModalWatchlistUI(isWatchlisted) {
-            const icon = document.getElementById('modal-add-icon');
-            const btn = document.getElementById('modal-add-btn');
-            
-            if(!icon || !btn) return;
-            
-            // Remove both classes first to ensure clean state
-            icon.classList.remove('fa-plus', 'fa-check');
-            
-            if (isWatchlisted) {
-                icon.classList.add('fa-check');
-                btn.classList.remove('bg-[#2a2a2a]/80', 'text-white');
-                btn.classList.add('bg-white', 'text-black');
-            } else {
-                icon.classList.add('fa-plus');
-                btn.classList.remove('bg-white', 'text-black');
-                btn.classList.add('bg-[#2a2a2a]/80', 'text-white');
-            }
-        }
-
-        // --- MODALS & PLAYER ---
-
-        window.openDetailsModal = async (id, type) => {
-            const modal = document.getElementById('details-modal');
-            modal.classList.remove('hidden');
-            document.body.style.overflow = 'hidden'; 
-            
-            document.getElementById('modal-backdrop').style.backgroundImage = 'none';
-            document.getElementById('modal-backdrop').classList.add('skeleton');
-            document.getElementById('modal-title').innerText = '';
-            document.getElementById('modal-overview').innerText = 'Loading...';
-            document.getElementById('tv-controls').classList.add('hidden');
-            document.getElementById('modal-similar').innerHTML = '';
-            
-            try {
-                const [details, credits, similar] = await Promise.all([
-                    fetchTMDB(`/${type}/${id}`), fetchTMDB(`/${type}/${id}/credits`), fetchTMDB(`/${type}/${id}/similar`)
-                ]);
-
-                currentMedia = { ...details, type };
-                const backdropUrl = details.backdrop_path ? `${IMG_URL_ORIGINAL}${details.backdrop_path}` : FALLBACK_IMG;
-
-                if (details.backdrop_path) {
-                    const img = new Image();
-                    img.onload = () => {
-                        document.getElementById('modal-backdrop').style.backgroundImage = `url('${backdropUrl}')`;
-                        document.getElementById('modal-backdrop').classList.remove('skeleton');
-                    };
-                    img.src = backdropUrl;
-                } else {
-                     document.getElementById('modal-backdrop').classList.remove('skeleton');
-                     document.getElementById('modal-backdrop').style.backgroundColor = '#222';
-                }
-                
-                const title = details.title || details.name;
-                document.getElementById('modal-title').innerText = title;
-                document.getElementById('modal-year').innerText = (details.release_date || details.first_air_date || '').substring(0,4);
-                document.getElementById('modal-rating').innerText = details.adult ? '18+' : (type === 'movie' ? 'PG-13' : 'TV-MA');
-                
-                let runtimeStr = '';
-                if (type === 'movie' && details.runtime) runtimeStr = `${Math.floor(details.runtime / 60)}h ${details.runtime % 60}m`;
-                else if (type === 'tv' && details.number_of_seasons) runtimeStr = `${details.number_of_seasons} Season${details.number_of_seasons > 1 ? 's' : ''}`;
-                document.getElementById('modal-runtime').innerText = runtimeStr;
-                
-                // Programmatically attach click handlers via Object args for safety
-                document.getElementById('modal-play-btn').onclick = () => {
-                    const prog = continueWatching[id];
-                    if (type === 'tv') {
-                        const select = document.getElementById('season-selector');
-                        const season = select ? select.value : 1;
-                        if (prog && prog.season && prog.episode) {
-                            window.playMedia({id, type: 'tv', title, backdrop: backdropUrl, season: prog.season, episode: prog.episode, startTime: prog.progress});
-                        } else {
-                            window.playMedia({id, type: 'tv', title, backdrop: backdropUrl, season: season, episode: 1});
-                        }
-                    } else {
-                        window.playMedia({id, type: 'movie', title, backdrop: backdropUrl, startTime: prog ? prog.progress : 0});
-                    }
-                };
-                
-                document.getElementById('modal-add-btn').onclick = () => window.toggleWatchlist(currentMedia);
-
-                const isWatchlisted = watchlist.some(i => i.id === id && i.type === type);
-                updateModalWatchlistUI(isWatchlisted);
-
-                document.getElementById('modal-overview').innerText = details.overview || 'No overview available.';
-                document.getElementById('modal-cast').innerText = credits.cast.slice(0, 5).map(c => c.name).join(', ') || 'N/A';
-                document.getElementById('modal-genres').innerText = details.genres.map(g => g.name).join(', ') || 'Various';
-
-                if (type === 'tv' && details.seasons) {
-                    document.getElementById('tv-controls').classList.remove('hidden');
-                    const selector = document.getElementById('season-selector');
-                    selector.innerHTML = details.seasons.filter(s => s.season_number > 0).map(s => `<option value="${s.season_number}">Season ${s.season_number}</option>`).join('');
-                    
-                    const prog = continueWatching[id];
-                    if (prog && prog.season) selector.value = prog.season;
-                    await window.loadEpisodes(selector.value);
-                }
-
-                document.getElementById('modal-similar').innerHTML = similar.results.slice(0, 6).map(item => {
-                    if(!item.backdrop_path && !item.poster_path) return '';
-                    return `
-                        <div class="bg-[#222] rounded-lg overflow-hidden cursor-pointer hover:bg-[#333] transition-all hover:scale-105 border border-gray-800 shadow-lg relative" onclick="openDetailsModal(${item.id}, '${type}')">
-                            <img src="${IMG_URL}${item.backdrop_path || item.poster_path}" class="w-full aspect-video object-cover" loading="lazy">
-                            <div class="poster-title-overlay"><p class="poster-title-text">${item.title || item.name}</p></div>
-                        </div>
-                    `;
-                }).join('');
-
-            } catch (error) { console.error("Error:", error); }
-        };
-
-        window.loadEpisodes = async (seasonNumber) => {
-            if (!currentMedia) return;
-            const container = document.getElementById('episodes-list');
-            container.innerHTML = '<div class="text-center py-10 text-gray-500"><i class="fas fa-spinner fa-spin text-3xl"></i></div>';
-            
-            try {
-                const data = await fetchTMDB(`/tv/${currentMedia.id}/season/${seasonNumber}`);
-                const prog = continueWatching[currentMedia.id];
-                const bgUrl = currentMedia.backdrop_path ? `${IMG_URL_ORIGINAL}${currentMedia.backdrop_path}` : FALLBACK_IMG;
-                
-                container.innerHTML = data.episodes.map(ep => {
-                    const isLastWatched = prog && prog.season == seasonNumber && prog.episode == ep.episode_number;
-                    const progressPercent = isLastWatched && prog.duration ? (prog.progress / prog.duration) * 100 : 0;
-                    
-                    return `
-                    <div class="flex items-center p-4 border-b border-gray-800 cursor-pointer rounded-lg hover:bg-[#333] transition-colors group/ep" onclick="window.playMedia({id: ${currentMedia.id}, type: 'tv', title: '${window.escapeStr(currentMedia.name)}', backdrop: '${bgUrl}', season: ${seasonNumber}, episode: ${ep.episode_number}})">
-                        <div class="text-2xl font-bold text-gray-600 w-12 text-center group-hover/ep:text-white">${ep.episode_number}</div>
-                        <div class="relative w-36 aspect-video bg-[#111] flex-shrink-0 rounded-md overflow-hidden border border-gray-700">
-                            ${ep.still_path ? `<img src="${IMG_URL}${ep.still_path}" class="w-full h-full object-cover">` : ''}
-                            <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/ep:opacity-100 transition-opacity"><i class="fas fa-play text-white text-xl shadow-[0_0_10px_black] border-2 border-white rounded-full p-2 bg-black/50"></i></div>
-                            ${isLastWatched ? `<div class="progress-container"><div class="progress-bar shadow-[0_0_10px_#E50914]" style="width: ${progressPercent}%"></div></div>` : ''}
-                        </div>
-                        <div class="ml-5 flex-grow pr-2">
-                            <div class="flex justify-between items-center mb-1"><h4 class="font-bold text-white text-base truncate">${ep.name}</h4><span class="text-xs text-gray-400">${ep.runtime || '--'}m</span></div>
-                            <p class="text-xs text-gray-400 line-clamp-2 mt-1 leading-relaxed">${ep.overview}</p>
-                        </div>
-                    </div>
-                `}).join('');
-            } catch (e) { container.innerHTML = '<p class="text-red-500 p-4">Failed to load episodes.</p>'; }
-        };
-
-        window.closeModal = () => {
-            document.getElementById('details-modal').classList.add('hidden');
-            document.body.style.overflow = 'auto';
-            currentMedia = null;
-        };
-
-        // --- VIDKING PLAYER LOGIC ---
-        
-        let currentlyPlaying = null; 
-        let progressInterval = null;
-        
-        window.playMedia = ({ id, type, title, backdrop, season = null, episode = null, startTime = 0 }) => {
-            window.closeModal();
-            const playerOverlay = document.getElementById('player-overlay');
-            const iframeContainer = document.getElementById('iframe-container');
-            const playerTitle = document.getElementById('player-title');
-            
-            playerOverlay.classList.remove('hidden');
-            playerOverlay.classList.add('flex');
-            document.body.style.overflow = 'hidden';
-            
-            currentlyPlaying = { 
-                id, type, title, season, episode, 
-                backdrop: backdrop || FALLBACK_IMG
-            };
-            
-            let url = '';
-            if (type === 'movie') {
-                url = `https://www.vidking.net/embed/movie/${id}?color=e50914&autoPlay=true`;
-                playerTitle.innerText = title;
-            } else {
-                url = `https://www.vidking.net/embed/tv/${id}/${season}/${episode}?color=e50914&autoPlay=true`;
-                playerTitle.innerText = `${title} - S${season} E${episode}`;
-            }
-
-            // Tell Vidking to start from saved progress (if supported by their player)
-            if (startTime > 10) url += `&t=${Math.floor(startTime)}`;
-
-            iframeContainer.innerHTML = `<iframe src="${url}" class="w-full h-full border-0" allowfullscreen allow="autoplay; fullscreen"></iframe>`;
-            
-            // Background Progress Tracker
-            let mockProgress = startTime || 0;
-            
-            // Instant save to force row to appear immediately
-            setTimeout(() => {
-                saveProgressToDB(mockProgress > 0 ? mockProgress : 1, 7200);
-            }, 1000);
-            
-            progressInterval = setInterval(() => {
-                mockProgress += 5; 
-                saveProgressToDB(mockProgress, 7200); // 7200s (2 hours) average duration mock
-            }, 5000);
-        };
-
-        window.closePlayer = () => {
-            const playerOverlay = document.getElementById('player-overlay');
-            const iframeContainer = document.getElementById('iframe-container');
-            
-            iframeContainer.innerHTML = ''; // Destroy iframe to stop video
-            playerOverlay.classList.add('hidden');
-            playerOverlay.classList.remove('flex');
-            document.body.style.overflow = 'auto';
-            currentlyPlaying = null;
-            
-            if (progressInterval) clearInterval(progressInterval);
-        };
-
-        // Listener for actual player events if Vidking sends them
-        window.addEventListener('message', (event) => {
-            try {
-                let data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
-                if (data && data.event === 'timeupdate' && currentlyPlaying) {
-                    saveProgressToDB(data.currentTime, data.duration || 7200);
-                }
-            } catch(e) {}
-        });
-
-        async function saveProgressToDB(progress, duration) {
-            if(!currentlyPlaying || !window.currentUser) return;
-            const docRef = doc(db, 'artifacts', APP_ID, 'users', window.currentUser.uid, 'progress', currentlyPlaying.id.toString());
-            
-            try {
-                await setDoc(docRef, {
-                    id: currentlyPlaying.id,
-                    type: currentlyPlaying.type,
-                    title: currentlyPlaying.title,
-                    season: currentlyPlaying.season,
-                    episode: currentlyPlaying.episode,
-                    backdrop: currentlyPlaying.backdrop || FALLBACK_IMG,
-                    progress: progress,
-                    duration: duration,
+    window.toggleWL = async (media) => {
+        if (!curUser) return;
+        const isW = wl.some(i => i.id === media.id && i.type === media.type);
+        const ref = doc(db2, 'artifacts', AID, 'users', curUser.uid, 'watchlist', media.id.toString());
+        updWLUI(!isW);
+        try {
+            if (isW) { await deleteDoc(ref); showToast('Removed from My List'); }
+            else {
+                await setDoc(ref, {
+                    id: media.id, type: media.type,
+                    title: media.title || media.name,
+                    poster: media.backdrop_path ? IMG + media.backdrop_path : FALL,
                     timestamp: Date.now()
                 });
-            } catch(e) { console.error("Error saving progress:", e); }
+                showToast('Added to My List!');
+            }
+        } catch(e) {
+            console.error("WL error:", e);
+            updWLUI(isW);
+            showToast('Error. Check Firestore rules.', 'fa-exclamation-circle');
         }
+    };
 
-    </script>
+    function updWLUI(isW) {
+        const ic = document.getElementById('m-add-icon');
+        const bt = document.getElementById('m-add');
+        if (!ic || !bt) return;
+        ic.classList.remove('fa-plus', 'fa-check');
+        if (isW) { ic.classList.add('fa-check'); bt.className = 'bg-white text-black w-12 h-12 rounded-full flex items-center justify-center hover:scale-110 transition-all shadow-lg'; }
+        else { ic.classList.add('fa-plus'); bt.className = 'bg-[#2a2a2a]/80 backdrop-blur-md border border-gray-500/50 text-white w-12 h-12 rounded-full flex items-center justify-center hover:border-white hover:bg-[#404040] hover:scale-110 transition-all shadow-lg'; }
+    }
+
+    // ===== DETAILS MODAL =====
+    window.openDet = async (id, type) => {
+        const m = document.getElementById('det-modal');
+        m.classList.remove('hidden'); m.style.display = '';
+        document.body.style.overflow = 'hidden';
+        document.getElementById('m-backdrop').style.backgroundImage = 'none';
+        document.getElementById('m-backdrop').classList.add('skel');
+        document.getElementById('m-title').innerText = '';
+        document.getElementById('m-overview').innerText = 'Loading...';
+        document.getElementById('tv-ctrl').classList.add('hidden');
+        document.getElementById('m-similar').innerHTML = '';
+        try {
+            const [det, cred, sim] = await Promise.all([
+                fetchT('/' + type + '/' + id),
+                fetchT('/' + type + '/' + id + '/credits'),
+                fetchT('/' + type + '/' + id + '/similar')
+            ]);
+            curMedia = { ...det, type };
+            const bu = det.backdrop_path ? IMGO + det.backdrop_path : FALL;
+            if (det.backdrop_path) {
+                const img = new Image();
+                img.onload = () => { document.getElementById('m-backdrop').style.backgroundImage = "url('" + bu + "')"; document.getElementById('m-backdrop').classList.remove('skel'); };
+                img.onerror = () => { document.getElementById('m-backdrop').classList.remove('skel'); };
+                img.src = bu;
+            } else { document.getElementById('m-backdrop').classList.remove('skel'); document.getElementById('m-backdrop').style.backgroundColor = '#222'; }
+
+            const tt = det.title || det.name;
+            document.getElementById('m-title').innerText = tt;
+            document.getElementById('m-year').innerText = (det.release_date || det.first_air_date || '').substring(0, 4);
+            document.getElementById('m-rating').innerText = det.adult ? '18+' : (type === 'movie' ? 'PG-13' : 'TV-MA');
+            let rt = '';
+            if (type === 'movie' && det.runtime) rt = Math.floor(det.runtime / 60) + 'h ' + det.runtime % 60 + 'm';
+            else if (type === 'tv' && det.number_of_seasons) rt = det.number_of_seasons + ' Season' + (det.number_of_seasons > 1 ? 's' : '');
+            document.getElementById('m-runtime').innerText = rt;
+            document.getElementById('m-match').innerText = Math.round((det.vote_average || 8) * 10) + '% Match';
+
+            document.getElementById('m-play').onclick = () => {
+                const p = cw[id];
+                if (type === 'tv') {
+                    const sel = document.getElementById('season-sel');
+                    const s = sel ? sel.value : 1;
+                    if (p && p.season && p.episode) playM({ id, type: 'tv', title: tt, backdrop: bu, season: p.season, episode: p.episode, startTime: p.progress });
+                    else playM({ id, type: 'tv', title: tt, backdrop: bu, season: s, episode: 1 });
+                } else {
+                    playM({ id, type: 'movie', title: tt, backdrop: bu, startTime: p ? p.progress : 0 });
+                }
+            };
+            document.getElementById('m-add').onclick = () => toggleWL(curMedia);
+            updWLUI(wl.some(i => i.id === id && i.type === type));
+            document.getElementById('m-overview').innerText = det.overview || 'No overview available.';
+            document.getElementById('m-cast').innerText = cred.cast.slice(0, 5).map(c => c.name).join(', ') || 'N/A';
+            document.getElementById('m-genres').innerText = det.genres.map(g => g.name).join(', ') || 'Various';
+
+            if (type === 'tv' && det.seasons) {
+                document.getElementById('tv-ctrl').classList.remove('hidden');
+                const sel = document.getElementById('season-sel');
+                sel.innerHTML = det.seasons.filter(s => s.season_number > 0).map(s => '<option value="' + s.season_number + '">Season ' + s.season_number + '</option>').join('');
+                const p = cw[id];
+                if (p && p.season) sel.value = p.season;
+                loadEps(sel.value);
+            }
+
+            let simH = '';
+            sim.results.slice(0, 6).forEach(i => {
+                if (!i.backdrop_path && !i.poster_path) return;
+                const tt2 = escA(i.title || i.name || '');
+                simH += '<div class="bg-[#222] rounded-lg overflow-hidden cursor-pointer hover:bg-[#333] transition-all hover:scale-105 border border-gray-800/50 shadow-lg" onclick="openDet(' + i.id + ',\'' + type + '\')">';
+                simH += '<img src="' + IMG + (i.backdrop_path || i.poster_path) + '" class="w-full aspect-video object-cover" loading="lazy">';
+                simH += '<div class="ptitle-over"><p class="ptitle-txt">' + tt2 + '</p></div></div>';
+            });
+            document.getElementById('m-similar').innerHTML = simH;
+        } catch(e) { console.error("[Duoflix] Modal error:", e); }
+    };
+
+    async function loadEps(sn) {
+        if (!curMedia) return;
+        const c = document.getElementById('ep-list');
+        c.innerHTML = '<div class="text-center py-10 text-gray-500"><i class="fas fa-spinner fa-spin text-2xl"></i></div>';
+        try {
+            const d = await fetchT('/tv/' + curMedia.id + '/season/' + sn);
+            const p = cw[curMedia.id];
+            const bu = curMedia.backdrop_path ? IMGO + curMedia.backdrop_path : FALL;
+            let h = '';
+            d.episodes.forEach(ep => {
+                const isLast = p && p.season == sn && p.episode == ep.episode_number;
+                const pct = isLast && p.duration ? Math.round((p.progress / p.duration) * 100) : 0;
+                const tt = escA(curMedia.name || '');
+                h += '<div class="flex items-center p-3 rounded-lg hover:bg-white/5 transition-colors cursor-pointer group/ep" onclick="playM({id:' + curMedia.id + ',type:\'tv\',title:\'' + tt + '\',backdrop:\'' + bu + '\',season:' + sn + ',episode:' + ep.episode_number + '})">';
+                h += '<div class="text-xl font-bold text-gray-600 w-10 text-center group-hover/ep:text-netflix-red transition-colors">' + ep.episode_number + '</div>';
+                h += '<div class="relative w-28 aspect-video bg-[#111] flex-shrink-0 rounded-md overflow-hidden border border-gray-700/50">';
+                if (ep.still_path) h += '<img src="' + IMG + ep.still_path + '" class="w-full h-full object-cover">';
+                else h += '<div class="w-full h-full flex items-center justify-center"><i class="fas fa-film text-gray-700"></i></div>';
+                h += '<div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/ep:opacity-100 transition-opacity"><i class="fas fa-play text-white border-2 border-white rounded-full p-1.5 bg-black/50"></i></div>';
+                if (isLast) h += '<div class="prog-wrap"><div class="prog-bar" style="width:' + pct + '%"></div></div>';
+                h += '</div>';
+                h += '<div class="ml-4 flex-grow pr-2 min-w-0">';
+                h += '<div class="flex justify-between items-center mb-0.5"><h4 class="font-bold text-white text-sm truncate">' + escA(ep.name || '') + '</h4><span class="text-[10px] text-gray-500 flex-shrink-0 ml-2">' + (ep.runtime || '--') + 'm</span></div>';
+                h += '<p class="text-[11px] text-gray-400 line-clamp-2 leading-relaxed">' + escA(ep.overview || '') + '</p>';
+                h += '</div></div>';
+            });
+            c.innerHTML = h;
+        } catch(e) { c.innerHTML = '<p class="text-red-500 p-4">Failed to load.</p>'; }
+    }
+    window.loadEps = loadEps;
+
+    // Season selector event
+    document.getElementById('season-sel').addEventListener('change', function() { loadEps(this.value); });
+
+    window.closeDet = () => {
+        document.getElementById('det-modal').classList.add('hidden');
+        document.getElementById('det-modal').style.display = 'none';
+        document.body.style.overflow = 'auto';
+        curMedia = null;
+    };
+
+    // ===== PLAYER =====
+    let curPlay = null, progInt = null;
+
+    window.playM = (opts) => {
+        closeDet();
+        const ov = document.getElementById('player');
+        const ifc = document.getElementById('p-iframe');
+        const pt = document.getElementById('p-title');
+        ov.classList.remove('hidden'); ov.classList.add('flex'); ov.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        curPlay = { id: opts.id, type: opts.type, title: opts.title, season: opts.season, episode: opts.episode, backdrop: opts.backdrop || FALL };
+        let url = opts.type === 'movie'
+            ? 'https://www.vidking.net/embed/movie/' + opts.id + '?color=e50914&autoPlay=true'
+            : 'https://www.vidking.net/embed/tv/' + opts.id + '/' + opts.season + '/' + opts.episode + '?color=e50914&autoPlay=true';
+        if (opts.startTime > 10) url += '&t=' + Math.floor(opts.startTime);
+        pt.innerText = opts.type === 'tv' ? opts.title + ' - S' + opts.season + ' E' + opts.episode : opts.title;
+        ifc.innerHTML = '<iframe src="' + url + '" class="w-full h-full border-0" allowfullscreen allow="autoplay; fullscreen"></iframe>';
+        let mp = opts.startTime || 0;
+        setTimeout(() => saveProg(mp > 0 ? mp : 1, 7200), 1000);
+        progInt = setInterval(() => { mp += 5; saveProg(mp, 7200); }, 5000);
+    };
+
+    window.closePlay = () => {
+        document.getElementById('p-iframe').innerHTML = '';
+        const ov = document.getElementById('player');
+        ov.classList.add('hidden'); ov.classList.remove('flex'); ov.style.display = '';
+        document.body.style.overflow = 'auto';
+        curPlay = null;
+        if (progInt) clearInterval(progInt);
+    };
+
+    window.addEventListener('message', (ev) => {
+        try {
+            let d = typeof ev.data === 'string' ? JSON.parse(ev.data) : ev.data;
+            if (d && d.event === 'timeupdate' && curPlay) saveProg(d.currentTime, d.duration || 7200);
+        } catch(e) {}
+    });
+
+    async function saveProg(prog, dur) {
+        if (!curPlay || !curUser) return;
+        try {
+            await setDoc(doc(db2, 'artifacts', AID, 'users', curUser.uid, 'progress', curPlay.id.toString()), {
+                id: curPlay.id, type: curPlay.type, title: curPlay.title,
+                season: curPlay.season, episode: curPlay.episode,
+                backdrop: curPlay.backdrop, progress: prog, duration: dur, timestamp: Date.now()
+            });
+        } catch(e) { /* silent */ }
+    }
+
+    console.log("[Duoflix] Script loaded successfully. Waiting for auth...");
+</script>
 </body>
 </html>
