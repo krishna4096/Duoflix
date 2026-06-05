@@ -86,7 +86,7 @@
         }
         .row-posters::-webkit-scrollbar { display: none; }
 
-        /* Movie Posters */
+        /* Movie Posters (Wide 16:9 like Netflix) */
         .row-poster {
             object-fit: cover;
             width: 100%;
@@ -112,32 +112,36 @@
             box-shadow: 0px 4px 20px rgba(0,0,0,0.8);
         }
 
-        /* Hover Title Overlay */
+        /* Netflix-style Text Overlays (Mimics movie logos) */
         .poster-title-overlay {
             position: absolute;
             bottom: 0;
             left: 0;
             right: 0;
-            padding: 10px;
-            background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 100%);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            pointer-events: none; /* Let clicks pass through to the poster */
-        }
-        
-        .row-poster:hover .poster-title-overlay {
-            opacity: 1;
+            padding: 15px 10px 10px 10px;
+            background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.5) 60%, transparent 100%);
+            opacity: 1; 
+            pointer-events: none;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
         }
 
         .poster-title-text {
             color: white;
-            font-size: 0.85rem;
-            font-weight: 700;
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            font-size: 1.1rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.9), -1px -1px 0 rgba(0,0,0,0.5);
             text-align: center;
+            line-height: 1.1;
+            font-family: 'Inter', sans-serif;
+            letter-spacing: -0.5px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            width: 100%;
         }
 
         /* Progress Bar */
@@ -166,6 +170,27 @@
             background-size: cover;
             background-position: center;
         }
+
+        /* Avatar Selection Styling */
+        .avatar-option {
+            width: 48px;
+            height: 48px;
+            border-radius: 4px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+        .avatar-option:hover { transform: scale(1.1); }
+        .avatar-option.selected {
+            border-color: white;
+            transform: scale(1.1);
+            box-shadow: 0 0 10px rgba(255,255,255,0.3);
+        }
+        
+        /* Custom Player Overlay hide class */
+        .player-idle .player-controls { opacity: 0; pointer-events: none; }
+        .player-idle { cursor: none; }
+
     </style>
 </head>
 <body class="antialiased">
@@ -179,8 +204,16 @@
             
             <form id="auth-form" onsubmit="handleAuth(event)">
                 <input type="email" id="auth-email" placeholder="Email address" required class="w-full bg-[#333] border border-gray-600 text-white px-4 py-3 rounded outline-none focus:bg-[#444] mb-4 transition-colors">
-                <input type="password" id="auth-password" placeholder="Password" required class="w-full bg-[#333] border border-gray-600 text-white px-4 py-3 rounded outline-none focus:bg-[#444] mb-6 transition-colors">
+                <input type="password" id="auth-password" placeholder="Password" required class="w-full bg-[#333] border border-gray-600 text-white px-4 py-3 rounded outline-none focus:bg-[#444] mb-4 transition-colors">
                 
+                <!-- Avatar Selection (Only visible during Signup) -->
+                <div id="avatar-selection-container" class="hidden mb-6">
+                    <p class="text-gray-400 text-sm mb-2 font-medium">Choose your Avatar:</p>
+                    <div class="flex gap-3 justify-center" id="avatar-list">
+                        <!-- Avatars will be injected here -->
+                    </div>
+                </div>
+
                 <p id="auth-error-msg" class="text-[#e87c03] text-sm mb-4 hidden"></p>
                 
                 <button type="submit" id="auth-btn" class="w-full bg-netflix-red hover:bg-red-700 text-white font-bold py-3 rounded transition-transform hover:scale-[1.02] active:scale-95 shadow-lg">Sign In</button>
@@ -190,14 +223,13 @@
                 <span id="auth-toggle-text">New to Duoflix?</span> 
                 <button onclick="toggleAuthMode()" id="auth-toggle-btn" class="text-white hover:underline font-medium ml-1">Sign up now.</button>
             </div>
-            <p class="text-xs text-gray-500 mt-4">This page is protected by Firebase to ensure your account is secure.</p>
         </div>
     </div>
 
     <!-- Global Loading Spinner -->
     <div id="global-loader" class="fixed inset-0 z-[500] bg-[#141414] flex flex-col items-center justify-center">
         <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-netflix-red mb-4"></div>
-        <p class="text-gray-400 font-medium">Loading Duoflix...</p>
+        <p class="text-gray-400 font-medium text-xl">Duoflix</p>
     </div>
 
     <!-- API Setup Modal -->
@@ -240,17 +272,56 @@
             
             <!-- Profile -->
             <div class="flex items-center gap-2 cursor-pointer group relative">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png" alt="Profile" class="w-8 h-8 rounded-md shadow-md border border-transparent group-hover:border-white transition-colors">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png" alt="Profile" id="nav-profile-img" class="w-8 h-8 rounded-md shadow-md border border-transparent group-hover:border-white transition-colors">
                 <i class="fas fa-caret-down text-white text-xs group-hover:rotate-180 transition-transform duration-300 drop-shadow-md"></i>
                 
-                <div class="absolute top-10 right-0 bg-black/90 backdrop-blur-lg border border-gray-800 rounded-md w-40 hidden group-hover:block pt-2 pb-2 shadow-2xl">
-                    <div class="px-4 py-3 text-xs text-gray-500 border-b border-gray-800 break-words" id="user-email-display">user@email.com</div>
-                    <div class="px-4 py-3 hover:bg-gray-800 hover:text-white text-gray-300 text-sm cursor-pointer transition-colors" onclick="showWatchlist()"><i class="fas fa-list mr-2"></i> My List</div>
-                    <div class="px-4 py-3 hover:bg-netflix-red hover:text-white text-gray-300 text-sm cursor-pointer transition-colors" onclick="logoutUser()"><i class="fas fa-sign-out-alt mr-2"></i> Sign Out</div>
+                <div class="absolute top-10 right-0 bg-black/90 backdrop-blur-lg border border-gray-800 rounded-md w-48 hidden group-hover:block pt-2 pb-2 shadow-2xl">
+                    <div class="px-4 py-3 flex items-center gap-3 border-b border-gray-800 mb-1">
+                         <img src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png" id="dropdown-profile-img" class="w-10 h-10 rounded-md border border-gray-600">
+                         <div class="overflow-hidden">
+                             <p class="text-sm text-white font-bold truncate">Account</p>
+                             <p class="text-xs text-gray-500 truncate" id="user-email-display">user@email.com</p>
+                         </div>
+                    </div>
+                    
+                    <div class="px-4 py-2 hover:bg-gray-800 hover:text-white text-gray-300 text-sm cursor-pointer transition-colors" onclick="openAccountSettings()"><i class="fas fa-pencil-alt mr-2 w-4 text-center"></i> Manage Profiles</div>
+                    <div class="px-4 py-2 hover:bg-gray-800 hover:text-white text-gray-300 text-sm cursor-pointer transition-colors" onclick="showWatchlist()"><i class="fas fa-list mr-2 w-4 text-center"></i> My List</div>
+                    <div class="mt-1 border-t border-gray-800 pt-1">
+                        <div class="px-4 py-3 hover:bg-netflix-red hover:text-white text-gray-300 text-sm cursor-pointer transition-colors text-center font-medium" onclick="logoutUser()">Sign out of Duoflix</div>
+                    </div>
                 </div>
             </div>
         </div>
     </nav>
+
+    <!-- Account Settings Modal -->
+    <div id="account-settings-modal" class="fixed inset-0 z-[200] hidden items-center justify-center modal-overlay">
+        <div class="bg-[#181818]/95 backdrop-blur-xl p-8 rounded-xl max-w-md w-full mx-4 shadow-2xl border border-gray-700 relative">
+             <button onclick="closeAccountSettings()" class="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+            <h2 class="text-2xl font-bold mb-6 text-white border-b border-gray-700 pb-2">Edit Profile</h2>
+            
+            <div class="flex items-start gap-6 mb-8">
+                <div class="relative group cursor-pointer">
+                    <img id="settings-current-avatar" src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png" class="w-24 h-24 rounded-md border-2 border-gray-600 group-hover:border-white transition-colors">
+                </div>
+                <div class="flex-grow">
+                    <p class="text-sm text-gray-400 mb-1">Email</p>
+                    <p id="settings-email" class="text-white font-medium mb-4">...</p>
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <p class="text-sm text-gray-400 mb-3 font-medium">Choose Avatar</p>
+                <div class="flex gap-3 justify-start overflow-x-auto pb-2" id="settings-avatar-list">
+                    <!-- Avatars injected here -->
+                </div>
+            </div>
+
+            <button onclick="saveAccountSettings()" class="w-full bg-white hover:bg-gray-200 text-black font-bold py-3 rounded-lg transition-transform hover:scale-[1.02]">Save Changes</button>
+        </div>
+    </div>
 
     <!-- Search Results View -->
     <div id="search-results-view" class="hidden min-h-screen pt-28 px-4 md:px-12 bg-[#141414] z-40 relative">
@@ -260,7 +331,7 @@
 
     <!-- Watchlist View -->
     <div id="watchlist-view" class="hidden min-h-screen pt-28 px-4 md:px-12 bg-[#141414] z-40 relative">
-        <h2 class="text-3xl font-bold mb-6 text-white drop-shadow-md">My List (Cloud Synced)</h2>
+        <h2 class="text-3xl font-bold mb-6 text-white drop-shadow-md">My List</h2>
         <div id="watchlist-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 pb-20"></div>
     </div>
 
@@ -349,27 +420,35 @@
         </div>
     </div>
 
-    <!-- Video Player Overlay -->
-    <div id="player-overlay" class="fixed inset-0 z-[300] bg-black hidden flex-col">
-        <div class="p-4 flex justify-between items-center bg-gradient-to-b from-black/90 to-transparent absolute top-0 w-full z-10 transition-opacity hover:opacity-100 opacity-0 duration-300">
-            <button onclick="closePlayer()" class="text-white flex items-center gap-2 hover:text-netflix-red transition-colors font-bold text-lg drop-shadow-md">
-                <i class="fas fa-arrow-left text-2xl"></i> Back
-            </button>
-            <div id="player-title" class="text-white font-bold text-xl truncate w-1/2 text-center drop-shadow-md"></div>
-            <div class="w-20"></div>
+    <!-- Custom Video Player Wrapper -->
+    <div id="player-wrapper" class="fixed inset-0 z-[999] bg-black hidden flex-col transition-all duration-300">
+        
+        <!-- Transparent Control Overlay (Disappears on Idle) -->
+        <div id="player-controls" class="absolute inset-0 pointer-events-none transition-opacity duration-500 opacity-100 z-10 flex flex-col justify-between">
+            
+            <!-- Top Controls (Back Button & Title) -->
+            <div class="p-6 md:p-8 flex items-center bg-gradient-to-b from-black/90 via-black/40 to-transparent pointer-events-auto h-32">
+                <button onclick="closePlayer()" class="text-white hover:scale-110 transition-transform mr-6 drop-shadow-md">
+                    <i class="fas fa-arrow-left text-4xl"></i>
+                </button>
+                <div id="player-custom-title" class="text-white text-2xl md:text-3xl font-bold drop-shadow-xl tracking-wide"></div>
+            </div>
+            
+            <!-- We leave the bottom area transparent so Vidking's own controls show through -->
         </div>
-        <div class="flex-grow w-full h-full flex items-center justify-center relative bg-black">
+        
+        <!-- Iframe Container -->
+        <div class="w-full h-full flex items-center justify-center relative bg-black">
             <div id="iframe-container" class="w-full h-full"></div>
         </div>
     </div>
 
     <script type="module">
-        // Import Firebase modules directly
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Firebase Configuration (Provided by User)
+        // Provided Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyAJVq9E8tVo7qdavEdSgRZmBhMtcwrUa3k",
             authDomain: "duoflix-4c456.firebaseapp.com",
@@ -383,26 +462,39 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Core State
-        const APP_ID = 'duoflix_main'; // Used for Strict Rule Paths
+        // State Variables
+        const APP_ID = 'duoflix_main'; 
         const BASE_URL = 'https://api.themoviedb.org/3';
         const IMG_URL = 'https://image.tmdb.org/t/p/w500';
         const IMG_URL_ORIGINAL = 'https://image.tmdb.org/t/p/original';
         
-        let currentUser = null;
+        // Netflix default avatars
+        const AVATARS = [
+            'https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png',
+            'https://ih0.redbubble.net/image.618427277.3222/flat,1000x1000,075,f.u2.jpg',
+            'https://wallpapers.com/images/hd/netflix-profile-pictures-1000-x-1000-vnl1thqhqcgvqjru.jpg',
+            'https://wallpapers.com/images/hd/netflix-profile-pictures-1000-x-1000-88wkdmjrorckekha.jpg',
+            'https://pro2-bar-s3-cdn-cf1.myportfolio.com/dddb0c1b4ab622854dd81280840458d3/98032aebff601c1d993e12a0_rw_600.png'
+        ];
+
+        window.currentUser = null;
+        let currentUserData = { avatar: AVATARS[0] }; 
         let API_KEY = localStorage.getItem('tmdb_api_key');
         let watchlist = [];
         let continueWatching = {}; 
         let currentMedia = null; 
         let searchTimeout = null;
         let isFetching = false;
-        let authMode = 'login'; // login or signup
+        let authMode = 'login'; 
+        let selectedSignupAvatar = AVATARS[0];
+        let selectedSettingsAvatar = null;
 
-        // Firebase Subscriptions
+        // Firebase subscriptions
         let unsubWatchlist = null;
         let unsubProgress = null;
+        let unsubUser = null;
 
-        // Endpoints Setup
+        // Endpoints
         const requests = {
             trending: `/trending/all/week`,
             netflixOriginals: `/discover/tv?with_networks=213`,
@@ -414,15 +506,36 @@
 
         // --- AUTHENTICATION LOGIC ---
 
+        function renderAvatarOptions(containerId, selectedAvatar, clickHandlerName) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = AVATARS.map((url, index) => `
+                <img src="${url}" 
+                     class="avatar-option ${url === selectedAvatar ? 'selected' : ''}" 
+                     onclick="${clickHandlerName}('${url}')" 
+                     alt="Avatar ${index + 1}">
+            `).join('');
+        }
+
+        window.selectSignupAvatar = (url) => {
+            selectedSignupAvatar = url;
+            renderAvatarOptions('avatar-list', selectedSignupAvatar, 'selectSignupAvatar');
+        };
+
+        window.selectSettingsAvatar = (url) => {
+            selectedSettingsAvatar = url;
+            renderAvatarOptions('settings-avatar-list', selectedSettingsAvatar, 'selectSettingsAvatar');
+            document.getElementById('settings-current-avatar').src = url;
+        };
+
         onAuthStateChanged(auth, (user) => {
             const loader = document.getElementById('global-loader');
             if (loader) loader.classList.add('hidden');
 
             if (user) {
-                // Logged In
-                currentUser = user;
+                window.currentUser = user;
                 document.getElementById('auth-screen').classList.add('hidden');
                 document.getElementById('user-email-display').innerText = user.email;
+                document.getElementById('settings-email').innerText = user.email;
                 
                 subscribeToUserData();
 
@@ -435,14 +548,14 @@
                     window.initApp();
                 }
             } else {
-                // Logged Out
-                currentUser = null;
+                window.currentUser = null;
                 cleanupData();
                 document.getElementById('auth-screen').classList.remove('hidden');
                 document.getElementById('main-view').classList.add('hidden');
                 document.getElementById('api-setup-modal').classList.add('hidden');
                 document.getElementById('watchlist-view').classList.add('hidden');
                 document.getElementById('search-results-view').classList.add('hidden');
+                renderAvatarOptions('avatar-list', selectedSignupAvatar, 'selectSignupAvatar');
             }
         });
 
@@ -453,6 +566,13 @@
             document.getElementById('auth-toggle-text').innerText = authMode === 'login' ? 'New to Duoflix?' : 'Already have an account?';
             document.getElementById('auth-toggle-btn').innerText = authMode === 'login' ? 'Sign up now.' : 'Sign in.';
             document.getElementById('auth-error-msg').classList.add('hidden');
+            
+            const avatarContainer = document.getElementById('avatar-selection-container');
+            if (authMode === 'signup') {
+                avatarContainer.classList.remove('hidden');
+            } else {
+                avatarContainer.classList.add('hidden');
+            }
         };
 
         window.handleAuth = async (e) => {
@@ -469,7 +589,11 @@
                 if (authMode === 'login') {
                     await signInWithEmailAndPassword(auth, email, password);
                 } else {
-                    await createUserWithEmailAndPassword(auth, email, password);
+                    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                    await setDoc(doc(db, 'artifacts', APP_ID, 'users', userCredential.user.uid, 'profile', 'info'), {
+                        avatar: selectedSignupAvatar,
+                        createdAt: Date.now()
+                    });
                 }
                 errorMsg.classList.add('hidden');
             } catch (error) {
@@ -482,16 +606,55 @@
         };
 
         window.logoutUser = async () => {
-            if(confirm("Are you sure you want to sign out?")) {
-                await signOut(auth);
-            }
+            await signOut(auth);
+        };
+
+        // --- ACCOUNT SETTINGS ---
+        window.openAccountSettings = () => {
+            const modal = document.getElementById('account-settings-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            selectedSettingsAvatar = currentUserData.avatar;
+            document.getElementById('settings-current-avatar').src = selectedSettingsAvatar;
+            renderAvatarOptions('settings-avatar-list', selectedSettingsAvatar, 'selectSettingsAvatar');
+        };
+
+        window.closeAccountSettings = () => {
+            const modal = document.getElementById('account-settings-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        };
+
+        window.saveAccountSettings = async () => {
+             if (!window.currentUser) return;
+             try {
+                 await setDoc(doc(db, 'artifacts', APP_ID, 'users', window.currentUser.uid, 'profile', 'info'), {
+                     avatar: selectedSettingsAvatar,
+                     updatedAt: Date.now()
+                 }, { merge: true });
+                 window.closeAccountSettings();
+             } catch(e) {
+                 console.error("Error saving profile", e);
+             }
         };
 
         // --- FIRESTORE SYNC ---
 
         function subscribeToUserData() {
-            if (!currentUser) return;
-            const uid = currentUser.uid;
+            if (!window.currentUser) return;
+            const uid = window.currentUser.uid;
+
+            // Profile Listener
+            const profileRef = doc(db, 'artifacts', APP_ID, 'users', uid, 'profile', 'info');
+            unsubUser = onSnapshot(profileRef, (doc) => {
+                if (doc.exists() && doc.data().avatar) {
+                    currentUserData.avatar = doc.data().avatar;
+                } else {
+                    currentUserData.avatar = AVATARS[0]; 
+                }
+                document.getElementById('nav-profile-img').src = currentUserData.avatar;
+                document.getElementById('dropdown-profile-img').src = currentUserData.avatar;
+            }, (error) => console.error("Profile sync error:", error));
 
             // Watchlist Listener
             const watchRef = collection(db, 'artifacts', APP_ID, 'users', uid, 'watchlist');
@@ -499,9 +662,7 @@
                 watchlist = [];
                 snapshot.forEach(doc => watchlist.push(doc.data()));
                 
-                // Refresh UI if modal open
                 if(currentMedia) updateModalWatchlistUI(currentMedia.id, currentMedia.type);
-                // Refresh Watchlist view if open
                 if (!document.getElementById('watchlist-view').classList.contains('hidden')) {
                     window.showWatchlist();
                 }
@@ -519,6 +680,7 @@
         function cleanupData() {
             if (unsubWatchlist) unsubWatchlist();
             if (unsubProgress) unsubProgress();
+            if (unsubUser) unsubUser();
             watchlist = [];
             continueWatching = {};
             document.getElementById('rows-container').innerHTML = '';
@@ -569,24 +731,25 @@
             if(isFetching) return;
             isFetching = true;
             try {
+                // Ensure rows are loaded safely without one failing the others
+                const safeFetch = async (title, endpoint, sectionId) => {
+                    try { await fetchAndBuildRow(title, endpoint, sectionId); } 
+                    catch(e) { console.error(`Failed row ${title}`); }
+                };
+
                 await Promise.all([
-                    fetchAndBuildRow('Trending Now', requests.trending, 'trending'),
-                    fetchAndBuildRow('Duoflix Originals', requests.netflixOriginals, 'tv-shows'),
-                    fetchAndBuildRow('Top Rated', requests.topRated, 'movies'),
-                    fetchAndBuildRow('Action & Adventure', requests.actionMovies),
-                    fetchAndBuildRow('Comedies', requests.comedyMovies),
-                    fetchAndBuildRow('Horror', requests.horrorMovies)
+                    safeFetch('Trending Now', requests.trending, 'trending'),
+                    safeFetch('Duoflix Originals', requests.netflixOriginals, 'tv-shows'),
+                    safeFetch('Top Rated', requests.topRated, 'movies'),
+                    safeFetch('Action & Adventure', requests.actionMovies),
+                    safeFetch('Comedies', requests.comedyMovies),
+                    safeFetch('Horror', requests.horrorMovies)
                 ]);
+                
                 window.buildContinueWatchingRow();
                 await buildHero();
             } catch (error) {
-                console.error("Failed to init app:", error);
-                if(error.message.includes("401")) {
-                    localStorage.removeItem('tmdb_api_key');
-                    API_KEY = null;
-                    document.getElementById('api-setup-modal').classList.remove('hidden');
-                    document.getElementById('api-setup-modal').classList.add('flex');
-                }
+                console.error("Critical app init failure:", error);
             }
             isFetching = false;
         };
@@ -646,26 +809,23 @@
             `;
             container.insertAdjacentHTML('beforeend', rowHTML);
 
-            try {
-                const data = await fetchTMDB(endpoint);
-                const rowElement = document.getElementById(rowId);
+            const data = await fetchTMDB(endpoint);
+            const rowElement = document.getElementById(rowId);
+            
+            rowElement.innerHTML = data.results.map(movie => {
+                const imgPath = movie.backdrop_path || movie.poster_path; 
+                if (!imgPath) return ''; 
+                const type = movie.media_type || (endpoint.includes('tv') ? 'tv' : 'movie');
+                const titleText = movie.name || movie.title || '';
                 
-                rowElement.innerHTML = data.results.map(movie => {
-                    const imgPath = movie.backdrop_path || movie.poster_path; // Prefer wide backdrop image
-                    if (!imgPath) return ''; 
-                    const type = movie.media_type || (endpoint.includes('tv') ? 'tv' : 'movie');
-                    const titleText = movie.name || movie.title;
-                    return `
-                    <div class="row-poster group relative" onclick="openDetailsModal(${movie.id}, '${type}')">
-                        <img src="${IMG_URL}${imgPath}" alt="${titleText}" class="w-full h-full object-cover rounded-md" loading="lazy">
-                        <div class="poster-title-overlay">
-                            <p class="poster-title-text">${titleText}</p>
-                        </div>
-                    </div>`;
-                }).join('');
-            } catch (e) {
-                document.getElementById(rowId).innerHTML = '<p class="text-gray-500 p-4">Content unavailable.</p>';
-            }
+                return `
+                <div class="row-poster group relative overflow-hidden" onclick="openDetailsModal(${movie.id}, '${type}')">
+                    <img src="${IMG_URL}${imgPath}" alt="${titleText}" class="w-full h-full object-cover rounded-md" loading="lazy">
+                    <div class="poster-title-overlay">
+                        <p class="poster-title-text">${titleText}</p>
+                    </div>
+                </div>`;
+            }).join('');
         }
 
         window.buildContinueWatchingRow = () => {
@@ -696,9 +856,11 @@
                                             <i class="fas fa-play text-white ml-1 text-lg"></i>
                                         </div>
                                     </div>
-                                    <div class="absolute bottom-5 left-2 right-2"><p class="text-xs md:text-sm font-bold truncate drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] text-white">${item.title}</p></div>
+                                    <div class="poster-title-overlay">
+                                        <p class="poster-title-text">${item.title}</p>
+                                    </div>
                                     <div class="progress-container"><div class="progress-bar shadow-[0_0_10px_#E50914]" style="width: ${(item.progress / item.duration) * 100}%"></div></div>
-                                    ${item.type === 'tv' ? `<span class="absolute top-2 right-2 bg-black/80 backdrop-blur-md px-1.5 py-0.5 text-[10px] md:text-xs rounded font-bold shadow-md border border-gray-700 text-white">S${item.season} E${item.episode}</span>` : ''}
+                                    ${item.type === 'tv' ? `<span class="absolute top-2 right-2 bg-black/80 backdrop-blur-md px-1.5 py-0.5 text-[10px] md:text-xs rounded font-bold shadow-md border border-gray-700 text-white z-10">S${item.season} E${item.episode}</span>` : ''}
                                 </div>
                             `).join('')}
                         </div>
@@ -758,7 +920,7 @@
             document.getElementById('search-icon').classList.remove('hidden');
             document.getElementById('search-input').value = '';
             document.getElementById('search-results-view').classList.add('hidden');
-            if(currentUser) document.getElementById('main-view').classList.remove('hidden');
+            if(window.currentUser) document.getElementById('main-view').classList.remove('hidden');
         };
 
         async function handleSearch(query) {
@@ -782,9 +944,7 @@
                     return `
                     <div class="relative group cursor-pointer transition-transform duration-300 hover:scale-105 hover:z-30 rounded-md overflow-hidden shadow-lg aspect-video" onclick="openDetailsModal(${item.id}, '${item.media_type}')">
                         <img src="${IMG_URL}${imgPath}" class="w-full h-full object-cover">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-0 group-hover:opacity-100 flex items-end justify-center transition-opacity p-2">
-                            <h3 class="text-white text-center font-bold text-xs md:text-sm truncate w-full">${item.title || item.name}</h3>
-                        </div>
+                        <div class="poster-title-overlay"><p class="poster-title-text">${item.title || item.name}</p></div>
                     </div>
                 `}).join('');
             } catch(e) { grid.innerHTML = '<p class="col-span-full text-red-500 text-center py-10">Network error.</p>'; }
@@ -806,43 +966,44 @@
             grid.innerHTML = watchlist.map(item => `
                 <div class="relative group cursor-pointer transition-transform duration-300 hover:scale-105 hover:z-30 rounded-md overflow-hidden shadow-lg aspect-video" onclick="openDetailsModal(${item.id}, '${item.type}')">
                     <img src="${item.poster}" class="w-full h-full object-cover">
-                    <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center transition-opacity p-2 text-center backdrop-blur-sm">
-                        <div class="bg-white text-black rounded-full w-10 h-10 flex items-center justify-center mb-2 shadow-[0_0_15px_rgba(255,255,255,0.4)] hover:scale-110 transition-transform">
-                            <i class="fas fa-play ml-1 text-sm"></i>
-                        </div>
-                        <h3 class="text-white font-bold text-xs md:text-sm truncate w-full drop-shadow-md">${item.title}</h3>
-                    </div>
+                    <div class="poster-title-overlay"><p class="poster-title-text">${item.title}</p></div>
                 </div>
             `).join('');
         };
 
         window.hideWatchlist = () => {
             document.getElementById('watchlist-view').classList.add('hidden');
-            if(currentUser) document.getElementById('main-view').classList.remove('hidden');
+            if(window.currentUser) document.getElementById('main-view').classList.remove('hidden');
         };
 
         window.toggleWatchlist = async (media) => {
-            if (!currentUser) return;
-            const docRef = doc(db, 'artifacts', APP_ID, 'users', currentUser.uid, 'watchlist', media.id.toString());
+            if (!window.currentUser) return;
             const isWatchlisted = watchlist.some(i => i.id === media.id && i.type === media.type);
+            const docRef = doc(db, 'artifacts', APP_ID, 'users', window.currentUser.uid, 'watchlist', media.id.toString());
             
+            // Optimistic UI Update
+            updateModalWatchlistUI(!isWatchlisted);
+
             try {
                 if (isWatchlisted) {
                     await deleteDoc(docRef);
                 } else {
-                    await setDoc(docRef, {
+                    const newItem = {
                         id: media.id,
                         type: media.type,
                         title: media.title || media.name,
                         poster: `${IMG_URL}${media.backdrop_path || media.poster_path}`,
                         timestamp: Date.now()
-                    });
+                    };
+                    await setDoc(docRef, newItem);
                 }
-            } catch(e) { console.error("Error updating watchlist:", e); }
+            } catch(e) { 
+                console.error("Error updating watchlist:", e); 
+                updateModalWatchlistUI(isWatchlisted); // Rollback on error
+            }
         };
 
-        function updateModalWatchlistUI(id, type) {
-            const isWatchlisted = watchlist.some(i => i.id === id && i.type === type);
+        function updateModalWatchlistUI(isWatchlisted) {
             const icon = document.getElementById('modal-add-icon');
             const btn = document.getElementById('modal-add-btn');
             
@@ -914,7 +1075,8 @@
                     }
                 };
 
-                updateModalWatchlistUI(id, type);
+                const isWatchlisted = watchlist.some(i => i.id === id && i.type === type);
+                updateModalWatchlistUI(isWatchlisted);
 
                 document.getElementById('modal-overview').innerText = details.overview || 'No overview available.';
                 document.getElementById('modal-cast').innerText = credits.cast.slice(0, 5).map(c => c.name).join(', ') || 'N/A';
@@ -933,9 +1095,9 @@
                 document.getElementById('modal-similar').innerHTML = similar.results.slice(0, 6).map(item => {
                     if(!item.backdrop_path && !item.poster_path) return '';
                     return `
-                        <div class="bg-[#222] rounded-lg overflow-hidden cursor-pointer hover:bg-[#333] transition-all hover:scale-105 border border-gray-800 shadow-lg" onclick="openDetailsModal(${item.id}, '${type}')">
+                        <div class="bg-[#222] rounded-lg overflow-hidden cursor-pointer hover:bg-[#333] transition-all hover:scale-105 border border-gray-800 shadow-lg relative" onclick="openDetailsModal(${item.id}, '${type}')">
                             <img src="${IMG_URL}${item.backdrop_path || item.poster_path}" class="w-full aspect-video object-cover" loading="lazy">
-                            <div class="p-4"><h4 class="text-white font-bold text-sm truncate">${item.title || item.name}</h4></div>
+                            <div class="poster-title-overlay"><p class="poster-title-text">${item.title || item.name}</p></div>
                         </div>
                     `;
                 }).join('');
@@ -979,41 +1141,59 @@
             currentMedia = null;
         };
 
+        // --- CUSTOM PLAYER WRAPPER ---
+        
         let currentlyPlaying = null; 
-        let lastSaveTime = 0; // Throttle DB writes
+        let lastSaveTime = 0; 
+        let playerIdleTimeout;
+        const playerWrapper = document.getElementById('player-wrapper');
+        const playerControls = document.getElementById('player-controls');
+
+        function resetPlayerIdle() {
+            playerWrapper.classList.remove('player-idle');
+            clearTimeout(playerIdleTimeout);
+            playerIdleTimeout = setTimeout(() => {
+                playerWrapper.classList.add('player-idle');
+            }, 3000);
+        }
+
+        // Attach idle events to player overlay
+        playerWrapper.addEventListener('mousemove', resetPlayerIdle);
+        playerWrapper.addEventListener('click', resetPlayerIdle);
+        playerWrapper.addEventListener('touchstart', resetPlayerIdle);
 
         window.playMedia = (id, type, title, season = null, episode = null, startTime = 0) => {
             window.closeModal();
-            const playerOverlay = document.getElementById('player-overlay');
-            playerOverlay.classList.remove('hidden');
-            playerOverlay.classList.add('flex');
+            playerWrapper.classList.remove('hidden');
+            playerWrapper.classList.add('flex');
             document.body.style.overflow = 'hidden';
+            resetPlayerIdle();
             
             currentlyPlaying = { id, type, title, season, episode, backdrop: currentMedia?.backdrop_path ? `${IMG_URL}${currentMedia.backdrop_path}` : null };
             
             let url = '';
             if (type === 'movie') {
                 url = `https://www.vidking.net/embed/movie/${id}?color=e50914&autoPlay=true`;
-                document.getElementById('player-title').innerText = title;
+                document.getElementById('player-custom-title').innerText = title;
             } else {
                 url = `https://www.vidking.net/embed/tv/${id}/${season}/${episode}?color=e50914&autoPlay=true`;
-                document.getElementById('player-title').innerText = `${title} - S${season} E${episode}`;
+                document.getElementById('player-custom-title').innerText = `${title} - S${season} E${episode}`;
             }
 
             if (startTime > 10) url += `&t=${Math.floor(startTime)}`;
 
             document.getElementById('iframe-container').innerHTML = `<iframe src="${url}" class="w-full h-full border-none" allowfullscreen allow="autoplay; fullscreen"></iframe>`;
             
-            // Force save initial 0 state
             saveProgressToDB(0, 100); 
         };
 
         window.closePlayer = () => {
             document.getElementById('iframe-container').innerHTML = ''; 
-            document.getElementById('player-overlay').classList.add('hidden');
-            document.getElementById('player-overlay').classList.remove('flex');
+            playerWrapper.classList.add('hidden');
+            playerWrapper.classList.remove('flex');
             document.body.style.overflow = 'auto';
             currentlyPlaying = null;
+            clearTimeout(playerIdleTimeout);
         };
 
         window.addEventListener('message', (event) => {
@@ -1022,7 +1202,7 @@
                 if (data && currentlyPlaying && (data.event === 'timeupdate' || (data.currentTime !== undefined && data.duration !== undefined))) {
                     
                     const now = Date.now();
-                    // Throttle saving to Firebase to once every 5 seconds to prevent quota explosion
+                    // Throttle saving to Firebase to once every 5 seconds
                     if (now - lastSaveTime > 5000) {
                         saveProgressToDB(data.currentTime, data.duration);
                         lastSaveTime = now;
@@ -1032,8 +1212,8 @@
         });
 
         async function saveProgressToDB(progress, duration) {
-            if(!currentlyPlaying || !currentUser) return;
-            const docRef = doc(db, 'artifacts', APP_ID, 'users', currentUser.uid, 'progress', currentlyPlaying.id.toString());
+            if(!currentlyPlaying || !window.currentUser) return;
+            const docRef = doc(db, 'artifacts', APP_ID, 'users', window.currentUser.uid, 'progress', currentlyPlaying.id.toString());
             
             try {
                 await setDoc(docRef, {
