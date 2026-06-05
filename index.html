@@ -1011,21 +1011,37 @@
 
         window.toggleWatchlist = async (media) => {
             if (!currentUser) return;
-            const docRef = doc(db, 'artifacts', APP_ID, 'users', currentUser.uid, 'watchlist', media.id.toString());
+            // The watchlist is a global array updated by Firebase.
+            // Check if the current media exists in this local copy.
             const isWatchlisted = watchlist.some(i => i.id === media.id && i.type === media.type);
+            const docRef = doc(db, 'artifacts', APP_ID, 'users', currentUser.uid, 'watchlist', media.id.toString());
             
             try {
                 if (isWatchlisted) {
                     await deleteDoc(docRef);
+                    // Update UI immediately for better UX
+                    watchlist = watchlist.filter(i => !(i.id === media.id && i.type === media.type));
                 } else {
-                    await setDoc(docRef, {
+                    const newItem = {
                         id: media.id,
                         type: media.type,
                         title: media.title || media.name,
                         poster: `${IMG_URL}${media.backdrop_path || media.poster_path}`,
                         timestamp: Date.now()
-                    });
+                    };
+                    await setDoc(docRef, newItem);
+                    // Update UI immediately for better UX
+                    watchlist.push(newItem);
                 }
+                
+                // Refresh the modal button immediately
+                updateModalWatchlistUI(media.id, media.type);
+
+                // If the watchlist view is open, refresh it
+                if (!document.getElementById('watchlist-view').classList.contains('hidden')) {
+                     window.showWatchlist();
+                }
+
             } catch(e) { console.error("Error updating watchlist:", e); }
         };
 
